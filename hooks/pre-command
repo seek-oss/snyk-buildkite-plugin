@@ -3,4 +3,4 @@
 echo "Running pre-command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build ${DIR}/.. -t docker-snyk:latest
-docker run -it -e SNYK_TOKEN -v `pwd`:/app docker-snyk:latest
+docker run -e SNYK_TOKEN -v `pwd`:/app docker-snyk:latest
