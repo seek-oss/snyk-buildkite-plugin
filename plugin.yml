@@ -1,0 +1,3 @@
+name: Snyk
+description: Runs vulnerability scans on dependencies and docker images
+author: https://github.com/seek-oss
