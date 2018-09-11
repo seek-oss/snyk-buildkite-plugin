@@ -6,7 +6,7 @@ requirements:
   - jq
 configuration:
   properties:
-    SNYK_TOKEN:
-      type: string
+    env:
+      type: object
   required:
     - SNYK_TOKEN
