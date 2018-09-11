@@ -4,9 +4,3 @@ author: https://github.com/seek-oss
 requirements:
   - docker
   - jq
-configuration:
-  properties:
-    env:
-      type: object
-  required:
-    - SNYK_TOKEN
