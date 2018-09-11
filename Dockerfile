@@ -5,7 +5,4 @@ RUN apk add --update jq
 RUN npm install -g snyk
 
 ENV PATH=$PATH:/root/.local/bin
-
-COPY . /plugin
-WORKDIR /plugin
-CMD ./snyk.sh
+CMD plugin/snyk.sh
