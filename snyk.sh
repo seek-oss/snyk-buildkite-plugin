@@ -7,4 +7,23 @@ cd $REPOSITORY
 npm install
 
 echo 'Running snyk test!'
-snyk test
+if [[ -n "$DEPENDENCY_PATH" ]];
+then
+    echo 'Explicit path specified'
+    echo "Dependency path: $DEPENDENCY_PATH"
+    snyk test --file=$DEPENDENCY_PATH --severity-threshold=low
+else
+    echo 'Explicit path not specified'
+    snyk test --severity-threshold=low
+fi
+
+snyk_exit_code="$?"
+
+echo 'Running snyk monitor!'
+snyk monitor --org=seek-poc # fix after POC phase
+
+if [[ "${snyk_exit_code}" != 0 ]]
+then
+  echo "Snyk found dependency vulnerabilities"
+  exit 1
+fi

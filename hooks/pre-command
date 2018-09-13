@@ -2,18 +2,25 @@
 
 echo 'Validating environment variables'
 
-if [ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ];
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ]];
 then
   echo "Block: $BUILDKITE_PLUGIN_SNYK_BLOCK"
 fi
   
-if [ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]]; 
 then
   echo "Language: $BUILDKITE_PLUGIN_SNYK_LANGUAGE"
 fi
 
+# path to dependency file
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_PATH" ]]; 
+then
+  echo "Path: $BUILDKITE_PLUGIN_SNYK_PATH"
+  export DEPENDENCY_PATH=$BUILDKITE_PLUGIN_SNYK_PATH
+fi
+
 # extract repository name
-if [ -n "$BUILDKITE_REPO" ]; 
+if [[ -n "$BUILDKITE_REPO" ]]; 
 then
   echo "Repository: $BUILDKITE_REPO"
   export REPOSITORY=$(echo $BUILDKITE_REPO | sed 's/.*:// ; s/.git//')
@@ -22,4 +29,4 @@ fi
 echo "Running pre-command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build ${DIR}/.. -t docker-snyk:latest
-docker run -e SNYK_TOKEN -e REPOSITORY -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest
+docker run -e SNYK_TOKEN -e REPOSITORY -e DEPENDENCY_PATH -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest
