@@ -4,3 +4,9 @@ author: https://github.com/seek-oss
 requirements:
   - docker
   - jq
+configuration:
+  properties:
+    block:
+      type: boolean
+    language:
+      type: string

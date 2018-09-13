@@ -3,7 +3,7 @@ echo 'Running snyk.sh'
 snyk auth $SNYK_TOKEN
 
 echo 'Running npm install!'
-cd app
+cd $REPOSITORY
 npm install
 
 echo 'Running snyk test!'
