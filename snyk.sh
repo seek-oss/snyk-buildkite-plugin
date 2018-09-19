@@ -25,5 +25,9 @@ snyk monitor --org=seek-poc # fix after POC phase
 if [[ "${snyk_exit_code}" != 0 ]]
 then
   echo "Snyk found dependency vulnerabilities"
-  exit 1
+  if [[ "$BUILDKITE_PLUGIN_SNYK_BLOCK" = true ]]
+  then
+    exit 1
+  fi
+  exit 0
 fi
