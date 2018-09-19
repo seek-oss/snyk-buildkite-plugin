@@ -10,6 +10,8 @@ configuration:
       type: boolean
     language:
       type: string
+    token:
+      type: string
     path:
       type: string
     severity:
