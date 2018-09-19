@@ -16,10 +16,10 @@ if [[ -n "$DEPENDENCY_PATH" ]];
 then
     echo 'Explicit path specified'
     echo "Dependency path: $DEPENDENCY_PATH"
-    snyk test --file=$DEPENDENCY_PATH --severity-threshold=low
+    snyk test --file=$DEPENDENCY_PATH --severity-threshold=$SEVERITY
 else
     echo 'Explicit path not specified'
-    snyk test --severity-threshold=low
+    snyk test --severity-threshold=$SEVERITY
 fi
 
 snyk_exit_code="$?"

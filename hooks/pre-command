@@ -27,7 +27,16 @@ then
   export REPOSITORY=$(echo $BUILDKITE_REPO | sed 's/.*:// ; s/.git//')
 fi
 
+# setting severity
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_SEVERITY" ]]; 
+then
+  echo "Severity: $BUILDKITE_PLUGIN_SNYK_SEVERITY"
+  export SEVERITY=$BUILDKITE_PLUGIN_SNYK_SEVERITY
+else
+  export SEVERITY="low"
+fi
+
 echo "Running pre-command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build ${DIR}/.. -t docker-snyk:latest
-docker run -e SNYK_TOKEN -e REPOSITORY -e LANGUAGE -e DEPENDENCY_PATH -e BUILDKITE_PLUGIN_SNYK_BLOCK -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest
+docker run -e SNYK_TOKEN -e REPOSITORY -e LANGUAGE -e DEPENDENCY_PATH -e BUILDKITE_PLUGIN_SNYK_BLOCK -e SEVERITY -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest

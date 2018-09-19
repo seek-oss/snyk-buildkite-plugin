@@ -12,3 +12,5 @@ configuration:
       type: string
     path:
       type: string
+    severity:
+      type: string
