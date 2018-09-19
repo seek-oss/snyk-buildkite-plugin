@@ -2,9 +2,14 @@
 echo 'Running snyk.sh'
 snyk auth $SNYK_TOKEN
 
-echo 'Running npm install!'
 cd $REPOSITORY
-npm install
+
+if [[ "$LANGUAGE" = "node" ]];
+then
+    echo 'Node repository detected'
+    echo 'Running npm install!'
+    npm install
+fi
 
 echo 'Running snyk test!'
 if [[ -n "$DEPENDENCY_PATH" ]];
