@@ -8,7 +8,6 @@ if [[ "$LANGUAGE" = "node" ]];
 then
     echo 'Node repository detected'
     echo 'Running npm install!'
-    export NPM_TOKEN=$BUILDKITE_PLUGIN_SNYK_TOKEN
     npm install
 fi
 

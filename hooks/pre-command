@@ -36,7 +36,13 @@ else
   export SEVERITY="low"
 fi
 
+# npm token
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_TOKEN" ]]; 
+then
+  export NPM_TOKEN=$(printenv $BUILDKITE_PLUGIN_SNYK_TOKEN)
+fi
+
 echo "Running pre-command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build ${DIR}/.. -t docker-snyk:latest
-docker run -e SNYK_TOKEN -e REPOSITORY -e LANGUAGE -e DEPENDENCY_PATH -e BUILDKITE_PLUGIN_SNYK_BLOCK -e SEVERITY -e BUILDKITE_PLUGIN_SNYK_TOKEN -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest
+docker run -e SNYK_TOKEN -e REPOSITORY -e LANGUAGE -e DEPENDENCY_PATH -e BUILDKITE_PLUGIN_SNYK_BLOCK -e SEVERITY -e NPM_TOKEN -v $DIR/..:/plugin -v `pwd`:/$REPOSITORY docker-snyk:latest
