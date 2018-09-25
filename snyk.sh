@@ -2,13 +2,25 @@
 echo 'Running snyk.sh'
 snyk auth $SNYK_TOKEN
 
-cd $REPOSITORY
 
 if [[ "$LANGUAGE" = "node" ]];
 then
     echo 'Node repository detected'
     echo 'Running npm install!'
+    cd $REPOSITORY
     npm install
+fi
+
+if [[ "$LANGUAGE" = "golang" ]];
+then
+    echo 'Go repository detected'
+    echo 'Setting up Go'
+    export GOPATH='/'
+
+    DIRECTORY=/src/github.com/$REPOSITORY
+    mkdir -p $DIRECTORY
+    cp -R $REPOSITORY /src/github.com/$REPOSITORY/..
+    cd /src/github.com/$REPOSITORY
 fi
 
 echo 'Running snyk test!'
