@@ -43,6 +43,17 @@ then
   export NPM_TOKEN=$(printenv $BUILDKITE_PLUGIN_SNYK_TOKEN)
 fi
 
+# artifactory credentials
+if [[ -n "$BUILDKITE_PLUGIN_ARTIFACTORY_USERNAME" ]]; 
+then
+  export ARTIFACTORY_USERNAME=$BUILDKITE_PLUGIN_ARTIFACTORY_USERNAME
+fi
+
+if [[ -n "$BUILDKITE_PLUGIN_ARTIFACTORY_PASSWORD" ]]; 
+then
+  export ARTIFACTORY_PASSWORD=$(printenv $BUILDKITE_PLUGIN_ARTIFACTORY_PASSWORD)
+fi
+
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build ${DIR}/.. -t docker-snyk:latest
@@ -54,5 +65,7 @@ docker run \
   -e BLOCK \
   -e SEVERITY \
   -e NPM_TOKEN \
+  -e ARTIFACTORY_USERNAME \
+  -e ARTIFACTORY_PASSWORD \
   -v $DIR/..:/plugin \
   -v `pwd`:/$REPOSITORY docker-snyk:latest

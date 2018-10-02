@@ -23,6 +23,18 @@ then
     cd /src/github.com/$REPOSITORY
 fi
 
+if [[ "$LANGUAGE" = "scala" ]];
+then
+    echo 'Scala repository detected'
+    echo 'Setting up gradle.properties'
+    mkdir ~/.gradle
+    GRADLE_PROPERTIES=~/.gradle/gradle.properties
+    touch $GRADLE_PROPERTIES
+    echo "artifactoryUsername=$ARTIFACTORY_USERNAME" >> $GRADLE_PROPERTIES
+    echo "artifactoryPassword=$ARTIFACTORY_PASSWORD" >> $GRADLE_PROPERTIES
+    cd $REPOSITORY
+fi
+
 echo 'Running snyk test!'
 if [[ -n "$DEPENDENCY_PATH" ]];
 then
