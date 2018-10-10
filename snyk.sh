@@ -8,6 +8,7 @@ then
     echo 'Node repository detected'
     echo 'Running npm install!'
     cd $REPOSITORY
+    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc 
     npm install
 fi
 
