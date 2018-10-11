@@ -2,7 +2,6 @@
 echo 'Running snyk.sh'
 snyk auth $SNYK_TOKEN
 
-
 if [[ "$LANGUAGE" = "node" ]];
 then
     echo 'Node repository detected'
@@ -34,6 +33,19 @@ then
     echo "artifactoryUsername=$ARTIFACTORY_USERNAME" >> $GRADLE_PROPERTIES
     echo "artifactoryPassword=$ARTIFACTORY_PASSWORD" >> $GRADLE_PROPERTIES
     cd $REPOSITORY
+fi
+
+if [[ "$LANGUAGE" = "python" ]];
+then
+    echo 'Python repository detected'
+    cd $REPOSITORY
+    if [[ -n "$DEPENDENCY_PATH" ]];
+    then
+        pip install -r $DEPENDENCY_PATH --user
+    else
+        # fallback to default requirements file
+        pip install -r requirements.txt --user
+    fi
 fi
 
 echo 'Running snyk test!'
