@@ -38,7 +38,13 @@ if [[ "$LANGUAGE" = "python" ]];
 then
     echo 'Python repository detected'
     cd $REPOSITORY
-    pip install -r $DEPENDENCY_PATH --user
+    if [[ -n "$DEPENDENCY_PATH" ]];
+    then
+        pip install -r $DEPENDENCY_PATH --user
+    else
+        # fallback to default requirements file
+        pip install -r requirements.txt --user
+    fi
 fi
 
 echo 'Running snyk test!'
