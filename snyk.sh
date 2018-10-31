@@ -62,7 +62,14 @@ fi
 snyk_exit_code="$?"
 
 echo 'Running snyk monitor!'
-snyk monitor --org=seek-poc # fix after POC phase
+if [[ -n "$TEAM" ]];
+then
+    echo 'Team specified'
+    snyk monitor --org=$TEAM
+else
+    echo 'No team specified'
+    snyk monitor --org=seek-poc # fix after POC phase
+fi
 
 if [[ "${snyk_exit_code}" != 0 ]]
 then
