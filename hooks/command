@@ -2,6 +2,11 @@
 
 echo 'Validating environment variables'
 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_TEAM" ]]; 
+then
+  export TEAM=$BUILDKITE_PLUGIN_SNYK_TEAM
+fi
+
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ]];
 then
   echo "Block: $BUILDKITE_PLUGIN_SNYK_BLOCK"
@@ -67,5 +72,6 @@ docker run \
   -e NPM_TOKEN \
   -e ARTIFACTORY_USERNAME \
   -e ARTIFACTORY_PASSWORD \
+  -e TEAM \
   -v $DIR/..:/plugin \
   -v `pwd`:/$REPOSITORY docker-snyk:latest
