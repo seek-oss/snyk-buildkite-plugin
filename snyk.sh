@@ -32,6 +32,7 @@ then
     touch $GRADLE_PROPERTIES
     echo "artifactoryUsername=$ARTIFACTORY_USERNAME" >> $GRADLE_PROPERTIES
     echo "artifactoryPassword=$ARTIFACTORY_PASSWORD" >> $GRADLE_PROPERTIES
+    cat $GRADLE_PROPERTIES # testing with dummy password
     cd $REPOSITORY
 fi
 

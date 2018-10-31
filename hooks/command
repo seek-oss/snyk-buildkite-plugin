@@ -46,11 +46,13 @@ fi
 # artifactory credentials
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYUSERNAME" ]]; 
 then
+  echo "Passing through Artifactory username"
   export ARTIFACTORY_USERNAME=$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYUSERNAME
 fi
 
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD" ]]; 
 then
+  echo "Passing through Artifactory password"
   export ARTIFACTORY_PASSWORD=$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD
 fi
 
