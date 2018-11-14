@@ -2,40 +2,34 @@
 
 echo 'Validating environment variables'
 
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ]];
-then
-  echo "Block: $BUILDKITE_PLUGIN_SNYK_BLOCK"
-  export BLOCK=$BUILDKITE_PLUGIN_SNYK_BLOCK
-fi
-  
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]];
 then
   echo "Language: $BUILDKITE_PLUGIN_SNYK_LANGUAGE"
   export LANGUAGE=$BUILDKITE_PLUGIN_SNYK_LANGUAGE
 fi
 
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_ORG" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ORG" ]];
 then
   echo "Org: $BUILDKITE_PLUGIN_SNYK_ORG"
   export ORG=$BUILDKITE_PLUGIN_SNYK_ORG
 fi
 
 # path to dependency file
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_PATH" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_PATH" ]];
 then
   echo "Path: $BUILDKITE_PLUGIN_SNYK_PATH"
   export DEPENDENCY_PATH=$BUILDKITE_PLUGIN_SNYK_PATH
 fi
 
 # extract repository name
-if [[ -n "$BUILDKITE_REPO" ]]; 
+if [[ -n "$BUILDKITE_REPO" ]];
 then
   echo "Repository: $BUILDKITE_REPO"
   export REPOSITORY=$(echo $BUILDKITE_REPO | sed 's/.*:// ; s/.git//')
 fi
 
 # setting severity
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_SEVERITY" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_SEVERITY" ]];
 then
   echo "Severity: $BUILDKITE_PLUGIN_SNYK_SEVERITY"
   export SEVERITY=$BUILDKITE_PLUGIN_SNYK_SEVERITY
@@ -44,18 +38,18 @@ else
 fi
 
 # npm token
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_TOKEN" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_TOKEN" ]];
 then
   export NPM_TOKEN=$(printenv $BUILDKITE_PLUGIN_SNYK_TOKEN)
 fi
 
 # artifactory credentials
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYUSERNAME" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYUSERNAME" ]];
 then
   export ARTIFACTORY_USERNAME=$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYUSERNAME
 fi
 
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD" ]];
 then
   export ARTIFACTORY_PASSWORD=$(printenv $BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD)
 fi
@@ -69,7 +63,6 @@ docker run \
   -e ORG \
   -e LANGUAGE \
   -e DEPENDENCY_PATH \
-  -e BLOCK \
   -e SEVERITY \
   -e NPM_TOKEN \
   -e ARTIFACTORY_USERNAME \

@@ -6,8 +6,6 @@ requirements:
   - jq
 configuration:
   properties:
-    block:
-      type: boolean
     language:
       type: string
     token:

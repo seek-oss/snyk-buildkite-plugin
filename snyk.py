@@ -8,11 +8,6 @@ import shutil
 BOLD = '\033[1m'
 UNBOLD = '\033[0;0m'
 
-BLOCK = True
-if 'BLOCK' in os.environ:
-    if 'false' in os.environ['BLOCK']:
-        BLOCK = False
-
 severity_mapping = {
     'low': 0,
     'medium': 1,
@@ -78,7 +73,7 @@ def snyk_test():
                 'severity': result['severity'],
                 'isUpgradable': result['isUpgradable'],
                 'isPatchable': result['isPatchable'],
-                'from': [introduced_from], 
+                'from': [introduced_from],
                 'upgradePath': [result['upgradePath']]
             }
 
@@ -105,7 +100,7 @@ def snyk_test():
             if result['isUpgradable']:
                 message += BOLD + 'Remediation: \n\t Upgrade {} to {} (triggers upgrades to {})\n'.format(result['from'][0][1], result['upgradePath'][0][1], ' > '.join(result['upgradePath'][0][1:])) + UNBOLD
             print(message)
-    
+
     summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
     print(summary)
 
@@ -133,19 +128,12 @@ def snyk_monitor(organisation):
 if __name__ == "__main__":
     EXIT_CODE = 1
     try:
-        eval('configure_{}()'.format(os.environ['LANGUAGE']))   
+        eval('configure_{}()'.format(os.environ['LANGUAGE']))
         EXIT_CODE = snyk_test()
         snyk_monitor(os.environ['ORG'])
     except Exception as e:
         print('error: {}'.format(e))
-        if BLOCK:
-            exit(1)
-        else:
-            exit(0)
+        exit(1)
 
-    if not BLOCK:
-        print('exit 0')
-        exit(0)
-    else:
-        print('exit {}'.format(EXIT_CODE))
-        exit(EXIT_CODE)
+    print('exit {}'.format(EXIT_CODE))
+    exit(EXIT_CODE)

@@ -7,7 +7,7 @@ then
     echo 'Node repository detected'
     echo 'Running npm install!'
     cd $REPOSITORY
-    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc 
+    echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> .npmrc
     npm install
 fi
 
@@ -74,9 +74,5 @@ fi
 if [[ "${snyk_exit_code}" != 0 ]]
 then
   echo "Snyk found dependency vulnerabilities"
-  if [[ "$BLOCK" = true ]]
-  then
-    exit 1
-  fi
-  exit 0
+  exit 1
 fi
