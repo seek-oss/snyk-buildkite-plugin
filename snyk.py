@@ -38,17 +38,10 @@ def configure_node():
 
 def configure_scala():
     print('Configuring scala!\n')
-    gradle_properties='~/.gradle/gradle.properties'
-    subprocess.run(['mkdir', '-p', '~/.gradle'])
-    subprocess.run(['touch', gradle_properties])
-
+    gradle_properties='{}/gradle.properties'.format(os.environ['REPOSITORY'])
     with open(gradle_properties, 'a') as f:
         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-
-    with open(gradle_properties) as f:
-        print(f.read())
-
     os.chdir(os.environ['REPOSITORY'])
 
 def snyk_test():
@@ -149,7 +142,10 @@ if __name__ == "__main__":
         snyk_monitor(os.environ['ORG'])
     except Exception as e:
         print('error: {}'.format(e))
-        sys.exit(1)
+        if BLOCK:
+            exit(1)
+        else:
+            exit(0)
 
     if not BLOCK:
         print('exit 0')
