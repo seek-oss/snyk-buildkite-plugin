@@ -51,7 +51,6 @@ def configure_scala():
 def snyk_test():
     EXIT_CODE = 0
     subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
-
     if 'DEPENDENCY_PATH' in os.environ:
         print('explicit path specified')
         results = (subprocess.run(['snyk', 'test', '--json', '--file={}'.format(os.environ['DEPENDENCY_PATH'])], stdout=subprocess.PIPE))
@@ -120,7 +119,7 @@ def snyk_test():
     for severity in results_seen:
         if severity_mapping[blocking_severity] <= severity_mapping[severity] and len(results_seen[severity]) > 0:
             EXIT_CODE = 1
-            print('blocking severity: {}, severity found: {}'.format(severity_mapping[blocking_severity], severity_mapping[severity]))
+            # print('blocking severity: {}, severity found: {}'.format(severity_mapping[blocking_severity], severity_mapping[severity]))
     return EXIT_CODE
 
 def print_env():
@@ -129,7 +128,10 @@ def print_env():
     print('ORG: {}'.format(os.environ['ORG']))
 
 def snyk_monitor(organisation):
-    result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation)], stdout=subprocess.PIPE))
+    if 'DEPENDENCY_PATH' in os.environ:
+        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation), '--file={}'.format(os.environ['DEPENDENCY_PATH'])], stdout=subprocess.PIPE))
+    else:
+        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation)], stdout=subprocess.PIPE))
     result = json.loads(result.stdout.decode())
     message = 'Taking snapshot of project dependencies!\n'
     message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
@@ -144,7 +146,7 @@ if __name__ == "__main__":
         snyk_monitor(os.environ['ORG'])
     except Exception as e:
         print('error: {}'.format(e))
-        sys.exit(0)
+        sys.exit(1)
 
     if not BLOCK:
         print('exit 0')
