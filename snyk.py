@@ -61,7 +61,6 @@ def snyk_test():
         'high': {}
     }
 
-    # quit out if there are errors
     if 'error' in results.keys():
         print('Error: {}'.format(results['error']))
         sys.exit(1)
@@ -110,12 +109,10 @@ def snyk_test():
     summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
     print(summary)
 
-    # determine exit code
     blocking_severity = os.environ['SEVERITY']
     for severity in results_seen:
         if severity_mapping[blocking_severity] <= severity_mapping[severity] and len(results_seen[severity]) > 0:
             EXIT_CODE = 1
-            # print('blocking severity: {}, severity found: {}'.format(severity_mapping[blocking_severity], severity_mapping[severity]))
     return EXIT_CODE
 
 def print_env():
@@ -136,7 +133,6 @@ def snyk_monitor(organisation):
 if __name__ == "__main__":
     EXIT_CODE = 1
     try:
-        print_env()
         eval('configure_{}()'.format(os.environ['LANGUAGE']))   
         EXIT_CODE = snyk_test()
         snyk_monitor(os.environ['ORG'])
