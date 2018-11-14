@@ -62,7 +62,7 @@ fi
 
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
-docker build ${DIR}/.. -t docker-snyk:latest
+docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
   -e SNYK_TOKEN \
   -e REPOSITORY \

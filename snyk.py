@@ -46,6 +46,9 @@ def configure_scala():
         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
 
+    with open(gradle_properties) as f:
+        print(f.read())
+
     os.chdir(os.environ['REPOSITORY'])
 
 def snyk_test():
