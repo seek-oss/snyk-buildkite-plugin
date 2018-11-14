@@ -2,11 +2,6 @@
 
 echo 'Validating environment variables'
 
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_TEAM" ]]; 
-then
-  export TEAM=$BUILDKITE_PLUGIN_SNYK_TEAM
-fi
-
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ]];
 then
   echo "Block: $BUILDKITE_PLUGIN_SNYK_BLOCK"
@@ -17,6 +12,12 @@ if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]];
 then
   echo "Language: $BUILDKITE_PLUGIN_SNYK_LANGUAGE"
   export LANGUAGE=$BUILDKITE_PLUGIN_SNYK_LANGUAGE
+fi
+
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ORG" ]]; 
+then
+  echo "Org: $BUILDKITE_PLUGIN_SNYK_ORG"
+  export ORG=$BUILDKITE_PLUGIN_SNYK_ORG
 fi
 
 # path to dependency file
@@ -61,10 +62,11 @@ fi
 
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
-docker build ${DIR}/.. -t docker-snyk:latest
+docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
   -e SNYK_TOKEN \
   -e REPOSITORY \
+  -e ORG \
   -e LANGUAGE \
   -e DEPENDENCY_PATH \
   -e BLOCK \
@@ -72,6 +74,5 @@ docker run \
   -e NPM_TOKEN \
   -e ARTIFACTORY_USERNAME \
   -e ARTIFACTORY_PASSWORD \
-  -e TEAM \
   -v $DIR/..:/plugin \
   -v `pwd`:/$REPOSITORY docker-snyk:latest

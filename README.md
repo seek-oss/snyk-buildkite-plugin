@@ -48,3 +48,8 @@ Example: low will show all low, medium, and high severities
 The name of the environment variable containing an NPM token required to pull private packages.
 
 This value can be passed using the [private-npm-buildkite-plugin](https://github.com/seek-oss/private-npm-buildkite-plugin)
+
+### `org` (required)
+The organisation (logical group) to which the build pipeline belongs 
+
+Examples: team-name-a, team-name-b

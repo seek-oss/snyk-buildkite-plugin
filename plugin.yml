@@ -20,5 +20,7 @@ configuration:
       type: string
     artifactoryPassword:
       type: string
-    team:
+    org:
       type: string
+  required:
+    - org
