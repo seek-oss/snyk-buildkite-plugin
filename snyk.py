@@ -131,21 +131,28 @@ def snyk_monitor(organisation):
     print(message)
 
 if __name__ == "__main__":
-    EXIT_CODE = 1
+    EXIT_CODE = None
     try:
-        eval('configure_{}()'.format(os.environ['LANGUAGE']))   
-        EXIT_CODE = snyk_test()
-        snyk_monitor(os.environ['ORG'])
+        eval('configure_{}()'.format(os.environ['LANGUAGE']))
     except Exception as e:
-        print('error: {}'.format(e))
-        if BLOCK:
-            exit(1)
-        else:
-            exit(0)
+        print('error configuring language, message: {} - Exiting'.format(e))
+        exit(0)
 
+    for attempt in range(0,3):
+        try:
+            EXIT_CODE = snyk_test()
+            snyk_monitor(os.environ['ORG'])
+        except Exception as e:
+            print('Something went wrong running Snyk tests - retrying')
+            EXIT_CODE = None
+            continue
+        break
+
+    if not EXIT_CODE:
+        exit(0)
     if not BLOCK:
-        print('exit 0')
+        print('EXIT 0')
         exit(0)
     else:
-        print('exit {}'.format(EXIT_CODE))
+        print('EXIT {}'.format(EXIT_CODE))
         exit(EXIT_CODE)
