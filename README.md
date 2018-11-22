@@ -14,7 +14,7 @@ steps:
         language: node
         path: package.json
         severity: low
-        token: NPM_TOKEN
+        npmToken: NPM_TOKEN
     agents: 
       queue: "security-prod:cicd"
 ```
@@ -44,7 +44,7 @@ Values: low, medium, high
 
 Example: low will show all low, medium, and high severities
 
-### `token` (optional)
+### `npmToken` (optional)
 The name of the environment variable containing an NPM token required to pull private packages.
 
 This value can be passed using the [private-npm-buildkite-plugin](https://github.com/seek-oss/private-npm-buildkite-plugin)
