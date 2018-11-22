@@ -27,7 +27,7 @@ Whether the build will block if vulnerabilities are found.
 
 Values: true, false (defaults to true)
 
-### `language` (optional)
+### `language` (required)
 The language/framework being tested for dependency vulnerabilities
 
 Values: node, dotnet
