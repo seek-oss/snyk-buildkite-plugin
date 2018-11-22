@@ -44,9 +44,9 @@ else
 fi
 
 # npm token
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_TOKEN" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_NPMTOKEN" ]]; 
 then
-  export NPM_TOKEN=$(printenv $BUILDKITE_PLUGIN_SNYK_TOKEN)
+  export NPM_TOKEN=$(printenv $BUILDKITE_PLUGIN_SNYK_NPMTOKEN)
 fi
 
 # artifactory credentials

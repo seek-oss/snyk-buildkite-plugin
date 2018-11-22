@@ -4,16 +4,46 @@ import json
 import subprocess
 import logging
 import shutil
+import boto3
 
 BOLD = '\033[1m'
 UNBOLD = '\033[0;0m'
 
-BLOCK = True
-if 'BLOCK' in os.environ:
-    if 'false' in os.environ['BLOCK']:
-        BLOCK = False
+MONITOR_SUCCESS = None
+TEST_SUCCESS = None
+EVENTS = {
+    'failure': 'test.snyk.scan.failure',
+    'success': 'test.snyk.scan.success',
+    'error': 'test.snyk.scan.error'
+}
 
-severity_mapping = {
+# extract out environment variables for safe usage
+try:
+    # mandatory fields
+    REPOSITORY = os.environ['REPOSITORY']
+    LANGUAGE = os.environ['LANGUAGE']
+
+    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
+
+    ORG = os.environ['ORG'] if 'ORG' in os.environ else ''
+    BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
+    PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
+    SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
+    EVENT_DATA = {
+        'version': 'test-version',
+        'repository': REPOSITORY,
+        'org': ORG,
+        'language': LANGUAGE,
+        'block': BLOCK,
+        'path': PATH,
+        'severity': SEVERITY
+    }
+
+except Exception as e:
+    send_metrics(event_name=EVENTS['error'], error_message=e)
+    sys.exit(0)
+
+SEVERITY_MAPPING = {
     'low': 0,
     'medium': 1,
     'high': 2
@@ -22,7 +52,7 @@ severity_mapping = {
 def configure_golang():
     print('Configuring golang')
     os.environ['GOPATH'] = '/'
-    repository = os.environ['REPOSITORY']
+    repository = REPOSITORY
     directory = '/src/github.com/{}'.format(repository)
     subprocess.run(['mkdir', '-p', directory])
     subprocess.run(['cp', '-R', repository, '/src/github.com/{}/..'.format(repository)])
@@ -30,26 +60,25 @@ def configure_golang():
 
 def configure_node():
     print('Configuring node!\n')
-    os.chdir(os.environ['REPOSITORY'])
-    if 'NPM_TOKEN' in os.environ:
+    os.chdir(REPOSITORY)
+    if NPM_TOKEN:
         with open('.npmrc', 'a') as f:
-            f.write('//registry.npmjs.org/:_authToken={}'.format(os.environ['NPM_TOKEN']))
+            f.write('//registry.npmjs.org/:_authToken={}'.format(NPM_TOKEN))
     subprocess.run(['npm', 'install', '-s'])
 
 def configure_scala():
     print('Configuring scala!\n')
-    gradle_properties='{}/gradle.properties'.format(os.environ['REPOSITORY'])
+    gradle_properties='{}/gradle.properties'.format(REPOSITORY)
     with open(gradle_properties, 'a') as f:
         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-    os.chdir(os.environ['REPOSITORY'])
+    os.chdir(REPOSITORY)
 
 def snyk_test():
     EXIT_CODE = 0
-    subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
     if 'DEPENDENCY_PATH' in os.environ:
         print('explicit path specified')
-        results = (subprocess.run(['snyk', 'test', '--json', '--file={}'.format(os.environ['DEPENDENCY_PATH'])], stdout=subprocess.PIPE))
+        results = (subprocess.run(['snyk', 'test', '--json', '--file={}'.format(PATH)], stdout=subprocess.PIPE))
     else:
         print('no path specified')
         results = (subprocess.run(['snyk', 'test', '--json'], stdout=subprocess.PIPE))
@@ -61,9 +90,10 @@ def snyk_test():
         'high': {}
     }
 
-    if 'error' in results.keys():
-        print('Error: {}'.format(results['error']))
-        sys.exit(1)
+    global TEST_SUCCESS
+    TEST_SUCCESS = False if 'error' in results.keys() else True
+    if not TEST_SUCCESS:
+        raise Exception('snyk test returned an error')
 
     for result in results['vulnerabilities']:
         introduced_from = result['from']
@@ -109,50 +139,76 @@ def snyk_test():
     summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
     print(summary)
 
-    blocking_severity = os.environ['SEVERITY']
     for severity in results_seen:
-        if severity_mapping[blocking_severity] <= severity_mapping[severity] and len(results_seen[severity]) > 0:
+        if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
             EXIT_CODE = 1
     return EXIT_CODE
 
-def print_env():
-    print('LANGUAGE: {}'.format(os.environ['LANGUAGE']))
-    print('REPOSITORY: {}'.format(os.environ['REPOSITORY']))
-    print('ORG: {}'.format(os.environ['ORG']))
-
 def snyk_monitor(organisation):
-    if 'DEPENDENCY_PATH' in os.environ:
-        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation), '--file={}'.format(os.environ['DEPENDENCY_PATH'])], stdout=subprocess.PIPE))
+    if PATH:
+        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation), '--file={}'.format(PATH)], stdout=subprocess.PIPE))
     else:
         result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation)], stdout=subprocess.PIPE))
     result = json.loads(result.stdout.decode())
+    
+    global MONITOR_SUCCESS
+    MONITOR_SUCCESS = False if 'error' in result.keys() else True
+    if not MONITOR_SUCCESS:
+        raise Exception('snyk monitor returned an error')
+
     message = 'Taking snapshot of project dependencies!\n'
     message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
     print(message)
 
+def send_metrics(event_name, error_message=None):
+    sns_client = boto3.client('sns', region_name='ap-southeast-2')
+    topic_arn = 'arn:aws:sns:ap-southeast-2:987872074697:paved-road-events'
+    event_source = 'test-sec-snyk'
+    
+    # add additional fields to event data
+    EVENT_DATA['testSuccess'] = TEST_SUCCESS
+    EVENT_DATA['monitorSuccess'] = MONITOR_SUCCESS
+    if error_message:
+        EVENT_DATA['error_message'] = error_message
+
+    event = {
+        'type': event_name,
+        'source': event_source,
+        'data': EVENT_DATA
+    }
+    response = sns_client.publish(
+        TopicArn=topic_arn,
+        Message=json.dumps(event)
+    )
+    print('response: {}'.format(response))
+
 if __name__ == "__main__":
     EXIT_CODE = None
     try:
-        eval('configure_{}()'.format(os.environ['LANGUAGE']))
+        eval('configure_{}()'.format(LANGUAGE))
+        subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
     except Exception as e:
-        print('error configuring language, message: {} - Exiting'.format(e))
+        send_metrics(event_name=EVENTS['error'], error_message=e)
         exit(0)
 
     for attempt in range(0,3):
         try:
             EXIT_CODE = snyk_test()
-            snyk_monitor(os.environ['ORG'])
+            snyk_monitor(ORG)
         except Exception as e:
-            print('Something went wrong running Snyk tests - retrying')
+            print('{}'.format(e))
             EXIT_CODE = None
             continue
         break
 
     if not EXIT_CODE:
+        send_metrics(event_name=EVENTS['error'], error_message='no exit code specified')
         exit(0)
-    if not BLOCK:
-        print('EXIT 0')
+    elif EXIT_CODE == 0:
+        send_metrics(event_name=EVENTS['success'])
         exit(0)
-    else:
-        print('EXIT {}'.format(EXIT_CODE))
-        exit(EXIT_CODE)
+    elif EXIT_CODE == 1:
+        send_metrics(event_name=EVENTS['failure'])
+        if BLOCK:
+            exit(1)
+        exit(0)
