@@ -24,7 +24,7 @@ try:
     LANGUAGE = os.environ['LANGUAGE']
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
-    METRICS_SNS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
+    METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
 
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
 
@@ -178,7 +178,7 @@ def send_metrics(event_name, error_message=None):
             'data': EVENT_DATA
         }
         sns_client.publish(
-            TopicArn=METRICS_SNS_TOPIC_ARN,
+            TopicArn=METRICS_TOPIC_ARN,
             Message=json.dumps(event)
         )
     except Exception as e:
