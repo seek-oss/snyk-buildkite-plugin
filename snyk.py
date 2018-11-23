@@ -23,6 +23,8 @@ try:
     REPOSITORY = os.environ['REPOSITORY']
     LANGUAGE = os.environ['LANGUAGE']
     VERSION = os.environ['VERSION']
+    PLUGIN_NAME = os.environ['PLUGIN_NAME']
+    METRICS_SNS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
 
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
 
@@ -164,9 +166,6 @@ def snyk_monitor(organisation):
 def send_metrics(event_name, error_message=None):
     try:
         sns_client = boto3.client('sns', region_name='ap-southeast-2')
-        topic_arn = 'arn:aws:sns:ap-southeast-2:987872074697:paved-road-events'
-        event_source = 'test-sec-snyk'
-        
         # add additional fields to event data
         EVENT_DATA['testSuccess'] = TEST_SUCCESS
         EVENT_DATA['monitorSuccess'] = MONITOR_SUCCESS
@@ -175,11 +174,11 @@ def send_metrics(event_name, error_message=None):
 
         event = {
             'type': event_name,
-            'source': event_source,
+            'source': PLUGIN_NAME,
             'data': EVENT_DATA
         }
         sns_client.publish(
-            TopicArn=topic_arn,
+            TopicArn=METRICS_SNS_TOPIC_ARN,
             Message=json.dumps(event)
         )
     except Exception as e:
