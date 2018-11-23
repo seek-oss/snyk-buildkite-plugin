@@ -12,9 +12,9 @@ UNBOLD = '\033[0;0m'
 MONITOR_SUCCESS = None
 TEST_SUCCESS = None
 EVENTS = {
-    'failure': 'test.snyk.scan.failure',
-    'success': 'test.snyk.scan.success',
-    'error': 'test.snyk.scan.error'
+    'fail': 'snyk.scan.fail',
+    'pass': 'snyk.scan.pass',
+    'error': 'snyk.scan.error'
 }
 
 # extract out environment variables for safe usage
@@ -22,6 +22,7 @@ try:
     # mandatory fields
     REPOSITORY = os.environ['REPOSITORY']
     LANGUAGE = os.environ['LANGUAGE']
+    VERSION = os.environ['VERSION']
 
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
 
@@ -30,7 +31,7 @@ try:
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
     EVENT_DATA = {
-        'version': 'test-version',
+        'version': VERSION,
         'repository': REPOSITORY,
         'org': ORG,
         'language': LANGUAGE,
@@ -161,26 +162,29 @@ def snyk_monitor(organisation):
     print(message)
 
 def send_metrics(event_name, error_message=None):
-    sns_client = boto3.client('sns', region_name='ap-southeast-2')
-    topic_arn = 'arn:aws:sns:ap-southeast-2:987872074697:paved-road-events'
-    event_source = 'test-sec-snyk'
-    
-    # add additional fields to event data
-    EVENT_DATA['testSuccess'] = TEST_SUCCESS
-    EVENT_DATA['monitorSuccess'] = MONITOR_SUCCESS
-    if error_message:
-        EVENT_DATA['error_message'] = error_message
+    try:
+        sns_client = boto3.client('sns', region_name='ap-southeast-2')
+        topic_arn = 'arn:aws:sns:ap-southeast-2:987872074697:paved-road-events'
+        event_source = 'test-sec-snyk'
+        
+        # add additional fields to event data
+        EVENT_DATA['testSuccess'] = TEST_SUCCESS
+        EVENT_DATA['monitorSuccess'] = MONITOR_SUCCESS
+        if error_message:
+            EVENT_DATA['error_message'] = error_message
 
-    event = {
-        'type': event_name,
-        'source': event_source,
-        'data': EVENT_DATA
-    }
-    response = sns_client.publish(
-        TopicArn=topic_arn,
-        Message=json.dumps(event)
-    )
-    print('response: {}'.format(response))
+        event = {
+            'type': event_name,
+            'source': event_source,
+            'data': EVENT_DATA
+        }
+        sns_client.publish(
+            TopicArn=topic_arn,
+            Message=json.dumps(event)
+        )
+    except Exception as e:
+        print('error sending metrics: {}'.format(e))
+        exit(0)
 
 if __name__ == "__main__":
     EXIT_CODE = None
@@ -202,13 +206,13 @@ if __name__ == "__main__":
         break
 
     if not EXIT_CODE:
-        send_metrics(event_name=EVENTS['error'], error_message='no exit code specified')
+        send_metrics(event_name=EVENTS['error'], error_message='snyk test and monitor did not both succeed')
         exit(0)
     elif EXIT_CODE == 0:
-        send_metrics(event_name=EVENTS['success'])
+        send_metrics(event_name=EVENTS['pass'])
         exit(0)
     elif EXIT_CODE == 1:
-        send_metrics(event_name=EVENTS['failure'])
+        send_metrics(event_name=EVENTS['fail'])
         if BLOCK:
             exit(1)
         exit(0)

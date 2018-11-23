@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+export VERSION='v0.0.12'
 echo 'Validating environment variables'
 
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_BLOCK" ]];
@@ -64,6 +65,7 @@ echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
+  -e VERSION \
   -e SNYK_TOKEN \
   -e REPOSITORY \
   -e ORG \
