@@ -43,7 +43,7 @@ try:
     }
 
 except Exception as e:
-    send_metrics(event_name=EVENTS['error'], error_message=e)
+    print('failed to extract environment variables: {}'.format(e))
     sys.exit(0)
 
 SEVERITY_MAPPING = {
@@ -191,6 +191,7 @@ if __name__ == "__main__":
         eval('configure_{}()'.format(LANGUAGE))
         subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
     except Exception as e:
+        print('config error: {}'.format(e))
         send_metrics(event_name=EVENTS['error'], error_message=e)
         exit(0)
 
