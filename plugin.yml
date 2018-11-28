@@ -10,7 +10,7 @@ configuration:
       type: boolean
     language:
       type: string
-    token:
+    npmToken:
       type: string
     path:
       type: string
@@ -24,3 +24,4 @@ configuration:
       type: string
   required:
     - org
+    - language
