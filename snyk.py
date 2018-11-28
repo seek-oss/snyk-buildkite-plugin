@@ -32,7 +32,7 @@ try:
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
-    SCAN_DEV_DEPS = True if 'SCAN_DEV_DEPS' in os.environ and 'true' in os.environ['SCAN_DEV_DEPS'] else False
+    SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
