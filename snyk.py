@@ -40,7 +40,8 @@ try:
         'language': LANGUAGE,
         'block': BLOCK,
         'path': PATH,
-        'severity': SEVERITY
+        'severity': SEVERITY,
+        'scanDevDeps': SCAN_DEV_DEPS
     }
 
 except Exception as e:
