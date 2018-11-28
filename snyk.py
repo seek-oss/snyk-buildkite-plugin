@@ -117,6 +117,12 @@ def snyk_test():
                 'from': [introduced_from], 
                 'upgradePath': [result['upgradePath']]
             }
+    
+    # vulnerability metrics
+    EVENT_DATA['vulnCount'] = results['uniqueCount']
+    EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
+    EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
+    EVENT_DATA['vulnLow'] = len(results_seen['low'].keys())
 
     vulnerable_paths = 0
     for severity in results_seen.keys():
