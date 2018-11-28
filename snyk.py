@@ -32,6 +32,7 @@ try:
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
+    SCAN_DEV_DEPS = True if 'SCAN_DEV_DEPS' in os.environ and 'true' in os.environ['SCAN_DEV_DEPS'] else False
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
@@ -79,14 +80,15 @@ def configure_scala():
 
 def snyk_test():
     EXIT_CODE = 0
-    if 'DEPENDENCY_PATH' in os.environ:
+    command = ['snyk', 'test', '--json']
+    if PATH:
         print('explicit path specified')
-        results = (subprocess.run(['snyk', 'test', '--json', '--file={}'.format(PATH)], stdout=subprocess.PIPE))
-    else:
-        print('no path specified')
-        results = (subprocess.run(['snyk', 'test', '--json'], stdout=subprocess.PIPE))
+        command.append('--file={}'.format(PATH))
+    if SCAN_DEV_DEPS:
+        command.append('--dev')
 
-    results = json.loads(results.stdout.decode())
+    response = subprocess.run(command, stdout=subprocess.PIPE)
+    results = json.loads(response.stdout.decode())
     results_seen = {
         'low': {},
         'medium': {},
@@ -148,11 +150,13 @@ def snyk_test():
     return EXIT_CODE
 
 def snyk_monitor(organisation):
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(organisation)]
     if PATH:
-        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation), '--file={}'.format(PATH)], stdout=subprocess.PIPE))
-    else:
-        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation)], stdout=subprocess.PIPE))
-    result = json.loads(result.stdout.decode())
+        command.append('--file={}'.format(PATH))
+    if SCAN_DEV_DEPS:
+        command.append('--dev')
+    response = subprocess.run(command, stdout=subprocess.PIPE)
+    result = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
     MONITOR_SUCCESS = False if 'error' in result.keys() else True

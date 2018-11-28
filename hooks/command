@@ -22,6 +22,11 @@ then
   export LANGUAGE=$BUILDKITE_PLUGIN_SNYK_LANGUAGE
 fi
 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_SCANDEVDEPS" ]]; 
+then
+  export SCAN_DEV_DEPS=$BUILDKITE_PLUGIN_SNYK_SCANDEVDEPS
+fi
+
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_ORG" ]]; 
 then
   echo "Org: $BUILDKITE_PLUGIN_SNYK_ORG"
@@ -79,6 +84,7 @@ docker run \
   -e REPOSITORY \
   -e ORG \
   -e LANGUAGE \
+  -e SCAN_DEV_DEPS \
   -e DEPENDENCY_PATH \
   -e BLOCK \
   -e SEVERITY \
