@@ -99,7 +99,7 @@ def snyk_test():
     }
 
     global TEST_SUCCESS
-    TEST_SUCCESS = 'error' in results.keys()
+    TEST_SUCCESS = 'error' not in results.keys()
     if not TEST_SUCCESS:
         raise Exception('snyk test returned an error: {}'.format(results['error']))
 
