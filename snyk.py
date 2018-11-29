@@ -73,10 +73,12 @@ def configure_node():
 
 def configure_scala():
     print('Configuring scala!\n')
-    gradle_properties='{}/gradle.properties'.format(REPOSITORY)
-    with open(gradle_properties, 'a') as f:
-        f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-        f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+    if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
+        print('Configuring artifactory username and password')
+        gradle_properties='{}/gradle.properties'.format(REPOSITORY)
+        with open(gradle_properties, 'a') as f:
+            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
     os.chdir(REPOSITORY)
 
 def snyk_test():
@@ -97,9 +99,9 @@ def snyk_test():
     }
 
     global TEST_SUCCESS
-    TEST_SUCCESS = False if 'error' in results.keys() else True
+    TEST_SUCCESS = 'error' in results.keys()
     if not TEST_SUCCESS:
-        raise Exception('snyk test returned an error')
+        raise Exception('snyk test returned an error: {}'.format(results['error']))
 
     for result in results['vulnerabilities']:
         introduced_from = result['from']
@@ -211,7 +213,7 @@ if __name__ == "__main__":
             EXIT_CODE = snyk_test()
             snyk_monitor(ORG)
         except Exception as e:
-            print('{}'.format(e))
+            print('error running test and monitor: {}'.format(e))
             EXIT_CODE = None
             continue
         break
