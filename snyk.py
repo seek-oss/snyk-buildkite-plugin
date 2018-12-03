@@ -106,6 +106,7 @@ def snyk_test():
     for result in results['vulnerabilities']:
         introduced_from = result['from']
         severity = result['severity']
+        print('result: {}\n'.format(result))
         if result['id'] in results_seen[severity]:
             results_seen[severity][result['id']]['from'].append(result['from'])
             results_seen[severity][result['id']]['upgradePath'].append(result['upgradePath'])
