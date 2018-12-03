@@ -32,6 +32,7 @@ try:
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
+    SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
@@ -39,7 +40,8 @@ try:
         'language': LANGUAGE,
         'block': BLOCK,
         'path': PATH,
-        'severity': SEVERITY
+        'severity': SEVERITY,
+        'scanDevDeps': SCAN_DEV_DEPS
     }
 
 except Exception as e:
@@ -71,22 +73,25 @@ def configure_node():
 
 def configure_scala():
     print('Configuring scala!\n')
-    gradle_properties='{}/gradle.properties'.format(REPOSITORY)
-    with open(gradle_properties, 'a') as f:
-        f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-        f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+    if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
+        print('Configuring artifactory username and password')
+        gradle_properties='{}/gradle.properties'.format(REPOSITORY)
+        with open(gradle_properties, 'a') as f:
+            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
     os.chdir(REPOSITORY)
 
 def snyk_test():
     EXIT_CODE = 0
-    if 'DEPENDENCY_PATH' in os.environ:
+    command = ['snyk', 'test', '--json']
+    if PATH:
         print('explicit path specified')
-        results = (subprocess.run(['snyk', 'test', '--json', '--file={}'.format(PATH)], stdout=subprocess.PIPE))
-    else:
-        print('no path specified')
-        results = (subprocess.run(['snyk', 'test', '--json'], stdout=subprocess.PIPE))
+        command.append('--file={}'.format(PATH))
+    if SCAN_DEV_DEPS:
+        command.append('--dev')
 
-    results = json.loads(results.stdout.decode())
+    response = subprocess.run(command, stdout=subprocess.PIPE)
+    results = json.loads(response.stdout.decode())
     results_seen = {
         'low': {},
         'medium': {},
@@ -94,9 +99,9 @@ def snyk_test():
     }
 
     global TEST_SUCCESS
-    TEST_SUCCESS = False if 'error' in results.keys() else True
+    TEST_SUCCESS = 'error' not in results.keys()
     if not TEST_SUCCESS:
-        raise Exception('snyk test returned an error')
+        raise Exception('snyk test returned an error: {}'.format(results['error']))
 
     for result in results['vulnerabilities']:
         introduced_from = result['from']
@@ -114,6 +119,12 @@ def snyk_test():
                 'from': [introduced_from], 
                 'upgradePath': [result['upgradePath']]
             }
+    
+    # vulnerability metrics
+    EVENT_DATA['vulnCount'] = results['uniqueCount']
+    EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
+    EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
+    EVENT_DATA['vulnLow'] = len(results_seen['low'].keys())
 
     vulnerable_paths = 0
     for severity in results_seen.keys():
@@ -148,11 +159,13 @@ def snyk_test():
     return EXIT_CODE
 
 def snyk_monitor(organisation):
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(organisation)]
     if PATH:
-        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation), '--file={}'.format(PATH)], stdout=subprocess.PIPE))
-    else:
-        result = (subprocess.run(['snyk', 'monitor', '--json', '--org={}'.format(organisation)], stdout=subprocess.PIPE))
-    result = json.loads(result.stdout.decode())
+        command.append('--file={}'.format(PATH))
+    if SCAN_DEV_DEPS:
+        command.append('--dev')
+    response = subprocess.run(command, stdout=subprocess.PIPE)
+    result = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
     MONITOR_SUCCESS = False if 'error' in result.keys() else True
@@ -200,7 +213,7 @@ if __name__ == "__main__":
             EXIT_CODE = snyk_test()
             snyk_monitor(ORG)
         except Exception as e:
-            print('{}'.format(e))
+            print('error running test and monitor: {}'.format(e))
             EXIT_CODE = None
             continue
         break

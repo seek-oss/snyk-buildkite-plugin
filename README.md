@@ -44,6 +44,11 @@ Values: low, medium, high
 
 Example: low will show all low, medium, and high severities
 
+### `scanDevDeps` (optional)
+Scan prod AND dev dependencies
+
+Values: true, false
+
 ### `npmToken` (optional)
 The name of the environment variable containing an NPM token required to pull private packages.
 

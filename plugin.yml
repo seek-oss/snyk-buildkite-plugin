@@ -22,6 +22,8 @@ configuration:
       type: string
     org:
       type: string
+    scanDevDeps:
+      type: boolean
   required:
     - org
     - language
