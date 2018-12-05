@@ -46,7 +46,7 @@ try:
 
 except Exception as e:
     print('failed to extract environment variables: {}'.format(e))
-    sys.exit(0)
+    exit(0)
 
 SEVERITY_MAPPING = {
     'low': 0,
@@ -99,11 +99,14 @@ def snyk_test():
     }
 
     global TEST_SUCCESS
-    TEST_SUCCESS = 'error' not in results.keys()
+    TEST_SUCCESS = 'error' not in results
     if not TEST_SUCCESS:
         raise Exception('snyk test returned an error: {}'.format(results['error']))
 
     for result in results['vulnerabilities']:
+        # skip over license results for the time being
+        if 'license' in result:
+            continue
         introduced_from = result['from']
         severity = result['severity']
         if result['id'] in results_seen[severity]:
@@ -121,14 +124,14 @@ def snyk_test():
             }
     
     # vulnerability metrics
-    EVENT_DATA['vulnCount'] = results['uniqueCount']
     EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
     EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
     EVENT_DATA['vulnLow'] = len(results_seen['low'].keys())
+    EVENT_DATA['vulnCount'] = EVENT_DATA['vulnHigh'] + EVENT_DATA['vulnMedium'] + EVENT_DATA['vulnLow']
 
     vulnerable_paths = 0
-    for severity in results_seen.keys():
-        for key in results_seen[severity].keys():
+    for severity in results_seen:
+        for key in results_seen[severity]:
             result = results_seen[severity][key]
             introduced_value = []
             for dependency_tree in result['from']:
@@ -168,7 +171,7 @@ def snyk_monitor(organisation):
     result = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
-    MONITOR_SUCCESS = False if 'error' in result.keys() else True
+    MONITOR_SUCCESS = False if 'error' in result else True
     if not MONITOR_SUCCESS:
         raise Exception('snyk monitor returned an error')
 
