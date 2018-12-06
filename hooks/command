@@ -47,6 +47,13 @@ then
   export REPOSITORY=$(echo $BUILDKITE_REPO | sed 's/.*:// ; s/.git//')
 fi
 
+# extract repository slug
+if [[ -n "$BUILDKITE_PIPELINE_SLUG" ]]; 
+then
+  echo "Pipeline slug: $BUILDKITE_PIPELINE_SLUG"
+  export REPOSITORY_SLUG=$BUILDKITE_PIPELINE_SLUG
+fi
+
 # setting severity
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_SEVERITY" ]]; 
 then
@@ -82,6 +89,7 @@ docker run \
   -e VERSION \
   -e SNYK_TOKEN \
   -e REPOSITORY \
+  -e REPOSITORY_SLUG \
   -e ORG \
   -e LANGUAGE \
   -e SCAN_DEV_DEPS \
