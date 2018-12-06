@@ -25,10 +25,11 @@ try:
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
+    REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG'] 
+    ORG = os.environ['ORG']
 
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
-
-    ORG = os.environ['ORG'] if 'ORG' in os.environ else ''
+    
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
@@ -83,7 +84,7 @@ def configure_scala():
 
 def snyk_test():
     EXIT_CODE = 0
-    command = ['snyk', 'test', '--json']
+    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     if PATH:
         print('explicit path specified')
         command.append('--file={}'.format(PATH))
@@ -161,8 +162,8 @@ def snyk_test():
             EXIT_CODE = 1
     return EXIT_CODE
 
-def snyk_monitor(organisation):
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(organisation)]
+def snyk_monitor():
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     if PATH:
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
@@ -214,7 +215,7 @@ if __name__ == "__main__":
     for attempt in range(0,3):
         try:
             EXIT_CODE = snyk_test()
-            snyk_monitor(ORG)
+            snyk_monitor()
         except Exception as e:
             print('error running test and monitor: {}'.format(e))
             EXIT_CODE = None
