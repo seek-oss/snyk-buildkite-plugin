@@ -222,7 +222,7 @@ if __name__ == "__main__":
             continue
         break
 
-    if not EXIT_CODE:
+    if EXIT_CODE == None:
         send_metrics(event_name=EVENTS['error'], error_message='snyk test and monitor did not both succeed')
         exit(0)
     elif EXIT_CODE == 0:
