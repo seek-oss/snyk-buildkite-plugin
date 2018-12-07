@@ -67,10 +67,14 @@ def configure_golang():
 def configure_node():
     print('Configuring node!\n')
     os.chdir(REPOSITORY)
-    if NPM_TOKEN:
+    if NPM_TOKEN: 
         with open('.npmrc', 'a') as f:
             f.write('//registry.npmjs.org/:_authToken={}'.format(NPM_TOKEN))
-    subprocess.run(['npm', 'install', '-s'])
+    if 'package-lock.json' in PATH or 'yarn.lock' in PATH:
+        print('Vulnerability scanning using lockfile ({})'.format(PATH))
+    else:
+        print('No lockfile specified, running npm install')
+        subprocess.run(['npm', 'install', '-s'])
 
 def configure_scala():
     print('Configuring scala!\n')
@@ -86,7 +90,7 @@ def snyk_test():
     EXIT_CODE = 0
     command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     if PATH:
-        print('explicit path specified')
+        print('Explicit path specified')
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
