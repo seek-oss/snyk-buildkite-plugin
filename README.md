@@ -34,6 +34,7 @@ Values: node, dotnet
 
 ### `path` (optional)
 The path to the dependency file from the root of the repository
+For node repositories, specifying the path to package-json.lock or yarn.lock is the preferred method.
 
 Example: package.json (defaults to looking in the root directory)
 
@@ -51,6 +52,7 @@ Values: true, false
 
 ### `npmToken` (optional)
 The name of the environment variable containing an NPM token required to pull private packages.
+Note: this field is not required when specifying a yarn or npm lockfile in the path field, as Snyk can scan the full dependency tree.
 
 This value can be passed using the [private-npm-buildkite-plugin](https://github.com/seek-oss/private-npm-buildkite-plugin)
 
