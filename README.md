@@ -6,15 +6,15 @@ Buildkite plugin for running Snyk scans
 steps:
   - name: "Snyk testing"
     plugins:
-      seek-oss/aws-sm#v0.0.5:
-        env:
-          SNYK_TOKEN: snyk-service-user-api-key
-      seek-oss/snyk#v0.0.4:
-        block: true
-        language: node
-        path: package.json
-        severity: low
-        npmToken: NPM_TOKEN
+      - seek-oss/aws-sm#v0.0.5:
+          env:
+            SNYK_TOKEN: snyk-service-user-api-key
+      - seek-oss/snyk#v0.0.4:
+          block: true
+          language: node
+          path: package.json
+          severity: low
+          npmToken: NPM_TOKEN
     agents: 
       queue: "security-prod:cicd"
 ```
