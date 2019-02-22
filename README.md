@@ -9,7 +9,7 @@ steps:
       - seek-oss/aws-sm#v0.0.5:
           env:
             SNYK_TOKEN: snyk-service-user-api-key
-      - seek-oss/snyk#v0.0.4:
+      - seek-oss/snyk#v0.0.16:
           block: true
           language: node
           path: package.json
