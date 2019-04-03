@@ -222,6 +222,9 @@ if __name__ == "__main__":
     try:
         eval('configure_{}()'.format(LANGUAGE))
         subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
+        subprocess.run(['pwd'])
+        subprocess.run(['ls'])
+
     except Exception as e:
         print('config error: {}'.format(e))
         send_metrics(event_name=EVENTS['error'], error_message=e)
