@@ -24,6 +24,8 @@ configuration:
       type: string
     scanDevDeps:
       type: boolean
+    customCommand:
+      type: string
   required:
     - org
     - language

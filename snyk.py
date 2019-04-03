@@ -30,7 +30,10 @@ try:
 
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
     
+    CUSTOM_COMMAND = os.environ['CUSTOM_COMMAND'] if 'CUSTOM_COMMAND' in os.environ else ''
+
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
+    DEBUG = True if 'DEBUG' in os.environ and 'true' in os.environ['DEBUG'] else False
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
     SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
@@ -88,7 +91,13 @@ def configure_scala():
 
 def snyk_test():
     EXIT_CODE = 0
-    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
+    if CUSTOM_COMMAND:
+        print('Using custom command!')
+        command = CUSTOM_COMMAND
+    else:
+        command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
+    
+    print(command)
     if PATH:
         print('Explicit path specified')
         command.append('--file={}'.format(PATH))
