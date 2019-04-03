@@ -21,6 +21,7 @@ EVENTS = {
 try:
     # mandatory fields
     REPOSITORY = os.environ['REPOSITORY']
+    print(f'Repository: {REPOSITORY}')
     LANGUAGE = os.environ['LANGUAGE']
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
