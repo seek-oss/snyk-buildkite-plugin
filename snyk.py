@@ -93,7 +93,8 @@ def snyk_test():
     EXIT_CODE = 0
     if CUSTOM_COMMAND:
         print('Using custom command!')
-        command = CUSTOM_COMMAND
+        command = CUSTOM_COMMAND.split(' ')
+        print(f'Command: {command}')
     else:
         command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     
