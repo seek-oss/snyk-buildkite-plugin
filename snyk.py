@@ -32,6 +32,7 @@ try:
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
     
     CUSTOM_COMMAND = os.environ['CUSTOM_COMMAND'] if 'CUSTOM_COMMAND' in os.environ else ''
+    ROOT_FOLDER = os.environ['ROOT_FOLDER'] if 'ROOT_FOLDER' in os.environ else ''
 
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     DEBUG = True if 'DEBUG' in os.environ and 'true' in os.environ['DEBUG'] else False
@@ -91,6 +92,11 @@ def configure_scala():
     os.chdir(REPOSITORY)
 
 def snyk_test():
+    if ROOT_FOLDER:
+        print(f'Root folder set: {ROOT_FOLDER}')
+        print(f'Current folder: {os.listdir()}')
+        os.chdir(ROOT_FOLDER)
+
     EXIT_CODE = 0
     if CUSTOM_COMMAND:
         print('Using custom command!')
@@ -222,8 +228,6 @@ if __name__ == "__main__":
     try:
         eval('configure_{}()'.format(LANGUAGE))
         subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
-        subprocess.run(['pwd'])
-        subprocess.run(['ls'])
 
     except Exception as e:
         print('config error: {}'.format(e))

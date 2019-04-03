@@ -85,10 +85,16 @@ then
   export CUSTOM_COMMAND=$BUILDKITE_PLUGIN_SNYK_CUSTOMCOMMAND
 fi
 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ROOTFOLDER" ]]; 
+then
+  export ROOT_FOLDER=$BUILDKITE_PLUGIN_SNYK_ROOTFOLDER
+fi
+
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
+  -e ROOT_FOLDER \
   -e PLUGIN_NAME \
   -e METRICS_TOPIC_ARN \
   -e VERSION \

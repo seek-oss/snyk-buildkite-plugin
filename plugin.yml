@@ -26,6 +26,8 @@ configuration:
       type: boolean
     customCommand:
       type: string
+    rootFolder:
+      type: string
   required:
     - org
     - language
