@@ -87,7 +87,6 @@ def configure_scala():
         print('Configuring artifactory username and password')
         gradle_properties = '~/.gradle/gradle.properties'
         os.makedirs('~/.gradle')
-        os.makedirs('~/.gradle/gradle.properties')
 
         with open(gradle_properties, 'a') as f:
             f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
