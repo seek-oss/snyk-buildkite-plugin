@@ -32,7 +32,7 @@ try:
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
     
     CUSTOM_COMMAND = os.environ['CUSTOM_COMMAND'] if 'CUSTOM_COMMAND' in os.environ else ''
-    ROOT_FOLDER = os.environ['ROOT_FOLDER'] if 'ROOT_FOLDER' in os.environ else ''
+    SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
 
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     DEBUG = True if 'DEBUG' in os.environ and 'true' in os.environ['DEBUG'] else False
@@ -95,6 +95,11 @@ def configure_scala():
         if os.path.isdir(REPOSITORY):
             print(f'Moving into directory: {REPOSITORY}')
             os.chdir(REPOSITORY)
+            print(f'Directory contents: {os.listdir()}')
+            if SUB_DIRECTORY:
+                print(f'Moving into sub directory: {SUB_DIRECTORY}')
+                os.chdir(SUB_DIRECTORY)
+
         # if os.path.isfile('gradle.properties'):
         #     print('gradle.properties exists in current directory!')
         #     gradle_properties='gradle.properties'
@@ -113,11 +118,6 @@ def configure_scala():
             
 
 def snyk_test():
-    if ROOT_FOLDER:
-        print(f'Root folder set: {ROOT_FOLDER}')
-        print(f'Current folder: {os.listdir()}')
-        os.chdir(ROOT_FOLDER)
-
     EXIT_CODE = 0
     if CUSTOM_COMMAND:
         print('Using custom command!')
