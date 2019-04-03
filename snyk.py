@@ -85,11 +85,30 @@ def configure_scala():
     print('Configuring scala!\n')
     if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
         print('Configuring artifactory username and password')
-        gradle_properties='{}/gradle.properties'.format(REPOSITORY)
+        gradle_properties = '~/.gradle/gradle.properties'
         with open(gradle_properties, 'a') as f:
             f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
             f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-    os.chdir(REPOSITORY)
+        print(f'working directory: {os.getcwd()}')
+        if os.path.isdir(REPOSITORY):
+            print(f'Moving into directory: {REPOSITORY}')
+            os.chdir(REPOSITORY)
+        # if os.path.isfile('gradle.properties'):
+        #     print('gradle.properties exists in current directory!')
+        #     gradle_properties='gradle.properties'
+        #     with open(gradle_properties, 'a') as f:
+        #         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+        #         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+
+        # elif os.path.isfile('{}/gradle.properties'.format(REPOSITORY)):
+        #     print('Creating ')
+        #     gradle_properties='{}/gradle.properties'.format(REPOSITORY)
+        #     print(f'gradle.properties exists: {gradle_properties}!')
+        #     with open(gradle_properties, 'a') as f:
+        #         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+        #         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+        # else:
+            
 
 def snyk_test():
     if ROOT_FOLDER:
