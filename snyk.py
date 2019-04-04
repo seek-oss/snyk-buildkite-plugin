@@ -85,17 +85,14 @@ def configure_scala():
     print('Configuring scala!\n')
     if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
         print('Configuring artifactory username and password')
-        print(f'working directory: {os.getcwd()}')
         if os.path.isdir(REPOSITORY):
             print(f'Moving into directory: {REPOSITORY}')
             os.chdir(REPOSITORY)
-            print(f'Directory contents: {os.listdir()}')
             if SUB_DIRECTORY:
                 print(f'Moving into sub directory: {SUB_DIRECTORY}')
                 os.chdir(SUB_DIRECTORY)
-                print(f'Sub directory contents: {os.listdir()}')
         else:
-            print('Cannot find correct directory - exiting')
+            print('Cannot determine directory for Snyk testing - exiting')
             exit(0)
 
         gradle_properties='gradle.properties'
