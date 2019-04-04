@@ -103,10 +103,9 @@ def configure_scala():
             print('gradle.properties exists in current directory!')
 
         with open(gradle_properties, 'a') as f:
-            print(os.path.realpath(f.name))
-            line = 'artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME'])
-            f.write(line)
-            # f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+            f.write('\n')
+            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
             
     else:
         print('Artifactory username/password not specified!')
@@ -127,9 +126,6 @@ def snyk_test():
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
-    #dangerous
-    with open('gradle.properties') as f:
-        print(f.read())
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
     results_seen = {
