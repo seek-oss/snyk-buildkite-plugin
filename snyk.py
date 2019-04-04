@@ -103,8 +103,11 @@ def configure_scala():
             print('gradle.properties exists in current directory!')
 
         with open(gradle_properties, 'a') as f:
-            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+            line = 'artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME'])
+            f.write(line)
+            print(line)
             f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+            
     else:
         print('Artifactory username/password not specified!')
         os.chdir(REPOSITORY)
