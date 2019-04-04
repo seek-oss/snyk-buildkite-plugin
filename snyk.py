@@ -66,7 +66,12 @@ def configure_golang():
 
 def configure_node():
     print('Configuring node!\n')
+    print(f'Moving into directory: {REPOSITORY}')
     os.chdir(REPOSITORY)
+    if SUB_DIRECTORY:
+        print(f'Moving into sub directory: {SUB_DIRECTORY}')
+        os.chdir(SUB_DIRECTORY)
+    
     if NPM_TOKEN: 
         with open('.npmrc', 'a') as f:
             f.write('//registry.npmjs.org/:_authToken={}'.format(NPM_TOKEN))
