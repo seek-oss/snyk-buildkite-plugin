@@ -57,6 +57,12 @@ Note: this field is not required when specifying a yarn or npm lockfile in the p
 This value can be passed using the [private-npm-buildkite-plugin](https://github.com/seek-oss/private-npm-buildkite-plugin)
 
 ### `org` (required)
-The organisation (logical group) to which the build pipeline belongs 
+The organisation (logical group) to which the build pipeline belongs
 
 Examples: team-name-a, team-name-b
+
+### `subDirectory` (optional) (mainly for testing)
+Specify a sub directory within the Git repository as the root directory for Snyk scanning.
+This is useful for repositories with submodules.
+
+Example: submodule-a, submodule-b

@@ -28,12 +28,8 @@ try:
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
     REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG'] 
     ORG = os.environ['ORG']
-
-    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
-    
-    CUSTOM_COMMAND = os.environ['CUSTOM_COMMAND'] if 'CUSTOM_COMMAND' in os.environ else ''
+    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''    
     SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
-
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     DEBUG = True if 'DEBUG' in os.environ and 'true' in os.environ['DEBUG'] else False
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
@@ -110,14 +106,7 @@ def configure_scala():
 
 def snyk_test():
     EXIT_CODE = 0
-    if CUSTOM_COMMAND:
-        print('Using custom command!')
-        command = CUSTOM_COMMAND.split(' ')
-        print(f'Command: {command}')
-    else:
-        command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
-    
-    print(command)
+    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     if PATH:
         print('Explicit path specified')
         command.append('--file={}'.format(PATH))
