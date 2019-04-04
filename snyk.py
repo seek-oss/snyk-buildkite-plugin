@@ -94,7 +94,7 @@ def configure_scala():
 
         with open(gradle_properties) as f:
             print('logging fake secret for testing purposes')
-            print(f.read(f))
+            print(f.read())
         
         print(f'working directory: {os.getcwd()}')
         if os.path.isdir(REPOSITORY):
