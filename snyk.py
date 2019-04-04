@@ -85,17 +85,6 @@ def configure_scala():
     print('Configuring scala!\n')
     if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
         print('Configuring artifactory username and password')
-        gradle_properties = '~/.gradle/gradle.properties'
-        os.makedirs('~/.gradle')
-
-        with open(gradle_properties, 'a') as f:
-            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-
-        with open(gradle_properties) as f:
-            print('logging fake secret for testing purposes')
-            print(f.read())
-        
         print(f'working directory: {os.getcwd()}')
         if os.path.isdir(REPOSITORY):
             print(f'Moving into directory: {REPOSITORY}')
@@ -104,23 +93,21 @@ def configure_scala():
             if SUB_DIRECTORY:
                 print(f'Moving into sub directory: {SUB_DIRECTORY}')
                 os.chdir(SUB_DIRECTORY)
+                print(f'Sub directory contents: {os.listdir()}')
+        else:
+            print('Cannot find correct directory - exiting')
+            exit(0)
 
-        # if os.path.isfile('gradle.properties'):
-        #     print('gradle.properties exists in current directory!')
-        #     gradle_properties='gradle.properties'
-        #     with open(gradle_properties, 'a') as f:
-        #         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-        #         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+        gradle_properties='gradle.properties'
+        if os.path.isfile(gradle_properties):
+            print('gradle.properties exists in current directory!')
 
-        # elif os.path.isfile('{}/gradle.properties'.format(REPOSITORY)):
-        #     print('Creating ')
-        #     gradle_properties='{}/gradle.properties'.format(REPOSITORY)
-        #     print(f'gradle.properties exists: {gradle_properties}!')
-        #     with open(gradle_properties, 'a') as f:
-        #         f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-        #         f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-        # else:
-            
+        with open(gradle_properties, 'a') as f:
+            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
+            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+    else:
+        print('Artifactory username/password not specified!')
+        os.chdir(REPOSITORY)
 
 def snyk_test():
     EXIT_CODE = 0
