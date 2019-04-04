@@ -101,7 +101,6 @@ docker run \
   -e SCAN_DEV_DEPS \
   -e DEPENDENCY_PATH \
   -e BLOCK \
-  -e CUSTOM_COMMAND \
   -e SEVERITY \
   -e NPM_TOKEN \
   -e ARTIFACTORY_USERNAME \

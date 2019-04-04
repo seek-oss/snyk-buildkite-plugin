@@ -24,8 +24,6 @@ configuration:
       type: string
     scanDevDeps:
       type: boolean
-    customCommand:
-      type: string
     subDirectory:
       type: string
   required:

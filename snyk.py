@@ -21,7 +21,6 @@ EVENTS = {
 try:
     # mandatory fields
     REPOSITORY = os.environ['REPOSITORY']
-    print(f'Repository: {REPOSITORY}')
     LANGUAGE = os.environ['LANGUAGE']
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
@@ -94,6 +93,8 @@ def configure_scala():
         gradle_properties='gradle.properties'
         if os.path.isfile(gradle_properties):
             print('gradle.properties exists in current directory!')
+        else:
+            print('gradle.properties will be created!')
 
         with open(gradle_properties, 'a') as f:
             f.write('\n')
