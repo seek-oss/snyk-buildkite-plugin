@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export VERSION='v0.0.17'
+export VERSION='v1.0.0'
 export PLUGIN_NAME='snyk-buildkite-plugin'
 
 echo 'Validating environment variables'
