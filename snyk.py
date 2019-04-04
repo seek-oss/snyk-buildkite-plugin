@@ -103,7 +103,7 @@ def configure_scala():
             print('gradle.properties exists in current directory!')
 
         with open(gradle_properties, 'a') as f:
-            print(os.path.realpath(f))
+            print(os.path.realpath(f.name))
             line = 'artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME'])
             f.write(line)
             # f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
