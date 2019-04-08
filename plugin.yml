@@ -24,6 +24,8 @@ configuration:
       type: string
     scanDevDeps:
       type: boolean
+    subDirectory:
+      type: string
   required:
     - org
     - language

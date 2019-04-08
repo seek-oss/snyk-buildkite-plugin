@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export VERSION='v0.0.16'
+export VERSION='v1.0.0'
 export PLUGIN_NAME='snyk-buildkite-plugin'
 
 echo 'Validating environment variables'
@@ -15,7 +15,7 @@ then
   echo "Block: $BUILDKITE_PLUGIN_SNYK_BLOCK"
   export BLOCK=$BUILDKITE_PLUGIN_SNYK_BLOCK
 fi
-  
+
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]]; 
 then
   echo "Language: $BUILDKITE_PLUGIN_SNYK_LANGUAGE"
@@ -80,10 +80,16 @@ then
   export ARTIFACTORY_PASSWORD=$(printenv $BUILDKITE_PLUGIN_SNYK_ARTIFACTORYPASSWORD)
 fi
 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_SUBDIRECTORY" ]]; 
+then
+  export SUB_DIRECTORY=$BUILDKITE_PLUGIN_SNYK_SUBDIRECTORY
+fi
+
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
+  -e SUB_DIRECTORY \
   -e PLUGIN_NAME \
   -e METRICS_TOPIC_ARN \
   -e VERSION \

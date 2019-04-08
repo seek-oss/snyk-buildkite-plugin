@@ -27,9 +27,8 @@ try:
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
     REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG'] 
     ORG = os.environ['ORG']
-
-    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
-    
+    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''    
+    SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
@@ -66,7 +65,12 @@ def configure_golang():
 
 def configure_node():
     print('Configuring node!\n')
+    print(f'Moving into directory: {REPOSITORY}')
     os.chdir(REPOSITORY)
+    if SUB_DIRECTORY:
+        print(f'Moving into sub directory: {SUB_DIRECTORY}')
+        os.chdir(SUB_DIRECTORY)
+    
     if NPM_TOKEN: 
         with open('.npmrc', 'a') as f:
             f.write('//registry.npmjs.org/:_authToken={}'.format(NPM_TOKEN))
@@ -80,11 +84,30 @@ def configure_scala():
     print('Configuring scala!\n')
     if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
         print('Configuring artifactory username and password')
-        gradle_properties='{}/gradle.properties'.format(REPOSITORY)
+        if os.path.isdir(REPOSITORY):
+            print(f'Moving into directory: {REPOSITORY}')
+            os.chdir(REPOSITORY)
+            if SUB_DIRECTORY:
+                print(f'Moving into sub directory: {SUB_DIRECTORY}')
+                os.chdir(SUB_DIRECTORY)
+        else:
+            print('Cannot determine directory for Snyk testing - exiting')
+            exit(0)
+
+        gradle_properties='gradle.properties'
+        if os.path.isfile(gradle_properties):
+            print('gradle.properties exists in current directory!')
+        else:
+            print('gradle.properties will be created!')
+
         with open(gradle_properties, 'a') as f:
+            f.write('\n')
             f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
             f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-    os.chdir(REPOSITORY)
+            
+    else:
+        print('Artifactory username/password not specified!')
+        os.chdir(REPOSITORY)
 
 def snyk_test():
     EXIT_CODE = 0
@@ -94,7 +117,6 @@ def snyk_test():
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
-
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
     results_seen = {
@@ -211,6 +233,7 @@ if __name__ == "__main__":
     try:
         eval('configure_{}()'.format(LANGUAGE))
         subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
+
     except Exception as e:
         print('config error: {}'.format(e))
         send_metrics(event_name=EVENTS['error'], error_message=e)
