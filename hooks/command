@@ -85,11 +85,18 @@ then
   export SUB_DIRECTORY=$BUILDKITE_PLUGIN_SNYK_SUBDIRECTORY
 fi
 
+# package manager experimental flag
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_PACKAGEMANAGER" ]]; 
+then
+  export PACKAGE_MANAGER=$BUILDKITE_PLUGIN_SNYK_PACKAGEMANAGER
+fi
+
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build -q ${DIR}/.. -t docker-snyk:latest
 docker run \
   -e SUB_DIRECTORY \
+  -e PACKAGE_MANAGER \
   -e PLUGIN_NAME \
   -e METRICS_TOPIC_ARN \
   -e VERSION \

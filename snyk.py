@@ -29,6 +29,7 @@ try:
     ORG = os.environ['ORG']
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''    
     SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
+    PACKAGE_MANAGER = os.environ['PACKAGE_MANAGER'] if 'PACKAGE_MANAGER' in os.environ else ''
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
@@ -117,6 +118,9 @@ def snyk_test():
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
+    if PACKAGE_MANAGER:
+        command.append(f'--packageManager={PACKAGE_MANAGER}')
+
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
     results_seen = {
@@ -194,6 +198,9 @@ def snyk_monitor():
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
+    if PACKAGE_MANAGER:
+        command.append(f'--packageManager={PACKAGE_MANAGER}')
+    
     response = subprocess.run(command, stdout=subprocess.PIPE)
     result = json.loads(response.stdout.decode())
     

@@ -26,6 +26,8 @@ configuration:
       type: boolean
     subDirectory:
       type: string
+    packageManager:
+      type: string
   required:
     - org
     - language
