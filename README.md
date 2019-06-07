@@ -67,7 +67,7 @@ This is useful for repositories with submodules.
 
 Example: submodule-a, submodule-b
 
-### `subDirectory` (optional) (mainly for testing)
+### `packageManager` (optional)
 Specify the specific package manager used for dependencies being tested.
 This is useful for scanning dependencies in monorepos.
 
