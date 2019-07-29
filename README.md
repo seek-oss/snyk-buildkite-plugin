@@ -15,6 +15,7 @@ steps:
           path: package.json
           severity: low
           npmToken: NPM_TOKEN
+          org: test-team
     agents: 
       queue: "security-prod:cicd"
 ```
