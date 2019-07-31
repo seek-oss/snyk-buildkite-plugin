@@ -31,7 +31,7 @@ Values: true, false (defaults to true)
 ### `language` (required)
 The language/framework being tested for dependency vulnerabilities
 
-Values: node, dotnet
+Values: node, golang, scala
 
 ### `path` (optional)
 The path to the dependency file from the root of the repository
