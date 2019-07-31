@@ -1,4 +1,4 @@
-FROM python:3.7.0-alpine3.8
+FROM python:3.7.4-alpine3.10
 RUN apk update && apk add --update npm jq go libc-dev openjdk8
 RUN apk add --no-cache nss
 RUN npm config set unsafe-perm true
