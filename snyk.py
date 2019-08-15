@@ -167,7 +167,7 @@ def snyk_test():
             }
 
     # vulnerability metrics
-    EVENT_DATA['vulnHigh'] += len(results_seen['high'].keys())
+    EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
     EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
     EVENT_DATA['vulnLow'] = len(results_seen['low'].keys())
     EVENT_DATA['vulnCount'] = EVENT_DATA['vulnHigh'] + EVENT_DATA['vulnMedium'] + EVENT_DATA['vulnLow']
