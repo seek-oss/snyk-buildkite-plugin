@@ -153,6 +153,7 @@ def snyk_test():
         # skip over license results for the time being
         if 'license' in result:
             continue
+
         introduced_from = result['from']
         severity = result['severity']
         if result['id'] in results_seen[severity]:
@@ -198,9 +199,10 @@ def snyk_test():
             if result['isUpgradable']:
                 message += BOLD + 'Remediation: \n\t Upgrade {} to {} (triggers upgrades to {})\n'.format(result['from'][0][1], result['upgradePath'][0][1], ' > '.join(result['upgradePath'][0][1:])) + UNBOLD
             print(message)
-    
-    summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
-    print(summary)
+
+    if not ALL_SUBPROJECTS:
+        summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
+        print(summary)
 
     for severity in results_seen:
         if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
