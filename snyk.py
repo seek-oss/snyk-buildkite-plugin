@@ -121,21 +121,32 @@ def snyk_test():
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
+    if ALL_SUBPROJECTS:
+        command.append('--all-sub-projects')
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
-    results_seen = {
-        'low': {},
-        'medium': {},
-        'high': {}
-    }
+
 
     global TEST_SUCCESS
     TEST_SUCCESS = 'error' not in results
     if not TEST_SUCCESS:
         raise Exception('snyk test returned an error: {}'.format(results['error']))
 
-    for result in results['vulnerabilities']:
+    vulns = []
+    if ALL_SUBPROJECTS:
+        for single_result in results:
+            vulns.append(single_result['vulnerabilities'])
+    else:
+        vulns = results['vulnerabilities']
+
+
+    results_seen = {
+        'low': {},
+        'medium': {},
+        'high': {}
+    }
+    for result in vulns:
         # skip over license results for the time being
         if 'license' in result:
             continue
@@ -151,12 +162,12 @@ def snyk_test():
                 'severity': result['severity'],
                 'isUpgradable': result['isUpgradable'],
                 'isPatchable': result['isPatchable'],
-                'from': [introduced_from], 
+                'from': [introduced_from],
                 'upgradePath': [result['upgradePath']]
             }
-    
+
     # vulnerability metrics
-    EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
+    EVENT_DATA['vulnHigh'] += len(results_seen['high'].keys())
     EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
     EVENT_DATA['vulnLow'] = len(results_seen['low'].keys())
     EVENT_DATA['vulnCount'] = EVENT_DATA['vulnHigh'] + EVENT_DATA['vulnMedium'] + EVENT_DATA['vulnLow']
@@ -193,6 +204,16 @@ def snyk_test():
             EXIT_CODE = 1
     return EXIT_CODE
 
+def check_monitor_result(result):
+    success = False if 'error' in result else True
+    if not success:
+        raise Exception('snyk monitor returned an error')
+
+    message = 'Taking snapshot of project dependencies!\n'
+    message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
+
+    print(message)
+
 def snyk_monitor():
     command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
 
@@ -211,19 +232,17 @@ def snyk_monitor():
 
     
     response = subprocess.run(command, stdout=subprocess.PIPE)
-    result = json.loads(response.stdout.decode())
+    results = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
-    MONITOR_SUCCESS = False if 'error' in result else True
-    if not MONITOR_SUCCESS:
-        raise Exception('snyk monitor returned an error')
 
-    message = 'Taking snapshot of project dependencies!\n'
+    if ALL_SUBPROJECTS:
+        for single_result in results:
+            check_monitor_result(single_result)
+    else:
+        check_monitor_result(results)
 
-    if ALL_SUBPROJECTS is False:
-        message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
-
-    print(message)
+    MONITOR_SUCCESS = True
 
 def send_metrics(event_name, error_message=None):
     try:
