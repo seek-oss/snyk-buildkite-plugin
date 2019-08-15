@@ -111,6 +111,11 @@ def configure_scala():
         print('Artifactory username/password not specified!')
         os.chdir(REPOSITORY)
 
+def check_for_snyk_test_error(result):
+    if 'error' in result:
+        TEST_SUCCESS = False
+        raise Exception('snyk test returned an error: {}'.format(result['error']))
+
 def snyk_test():
     EXIT_CODE = 0
     command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
@@ -127,17 +132,15 @@ def snyk_test():
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
 
-
     global TEST_SUCCESS
-    TEST_SUCCESS = 'error' not in results
-    if not TEST_SUCCESS:
-        raise Exception('snyk test returned an error: {}'.format(results['error']))
-
+    TEST_SUCCESS = True
     vulns = []
     if ALL_SUBPROJECTS:
         for single_result in results:
+            check_for_snyk_test_error(single_result)
             vulns.append(single_result['vulnerabilities'])
     else:
+        check_for_snyk_test_error(results)
         vulns = results['vulnerabilities']
 
 
@@ -207,6 +210,7 @@ def snyk_test():
 def check_monitor_result(result):
     success = False if 'error' in result else True
     if not success:
+        MONITOR_SUCCESS = False
         raise Exception('snyk monitor returned an error')
 
     message = 'Taking snapshot of project dependencies!\n'
@@ -235,6 +239,7 @@ def snyk_monitor():
     results = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
+    MONITOR_SUCCESS = True
 
     if ALL_SUBPROJECTS:
         for single_result in results:
@@ -242,7 +247,6 @@ def snyk_monitor():
     else:
         check_monitor_result(results)
 
-    MONITOR_SUCCESS = True
 
 def send_metrics(event_name, error_message=None):
     try:
