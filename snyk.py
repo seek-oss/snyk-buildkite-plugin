@@ -22,6 +22,7 @@ try:
     # mandatory fields
     REPOSITORY = os.environ['REPOSITORY']
     LANGUAGE = os.environ['LANGUAGE']
+    ALL_SUBPROJECTS =  True if 'ALLSUBPROJECTS' in os.environ and 'true' in os.environ['ALLSUBPROJECTS'] else False
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
@@ -200,6 +201,8 @@ def snyk_monitor():
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
+    if ALL_SUBPROJECTS:
+        command.append('--all-sub-projects')
     
     response = subprocess.run(command, stdout=subprocess.PIPE)
     result = json.loads(response.stdout.decode())
