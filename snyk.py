@@ -139,7 +139,8 @@ def snyk_test():
         for single_result in results:
             check_for_snyk_test_error(single_result)
             if len(single_result['vulnerabilities']) > 0:
-                vulns.append(single_result['vulnerabilities'])
+                for v in single_result['vulnerabilities']:
+                    vulns.append(v)
     else:
         check_for_snyk_test_error(results)
         vulns = results['vulnerabilities']
