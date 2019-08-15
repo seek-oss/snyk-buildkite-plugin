@@ -138,7 +138,8 @@ def snyk_test():
     if ALL_SUBPROJECTS:
         for single_result in results:
             check_for_snyk_test_error(single_result)
-            vulns.append(single_result['vulnerabilities'])
+            if len(single_result['vulnerabilities']) > 0:
+                vulns.append(single_result['vulnerabilities'])
     else:
         check_for_snyk_test_error(results)
         vulns = results['vulnerabilities']
