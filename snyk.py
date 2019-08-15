@@ -194,15 +194,21 @@ def snyk_test():
     return EXIT_CODE
 
 def snyk_monitor():
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
+
+    # monitor doesnt support all-sub-projects and project-name in the same command line.
+    if ALL_SUBPROJECTS:
+        command.append('--all-sub-projects')
+    else:
+        command.append('--project-name={}'.format(REPOSITORY_SLUG))
+
     if PATH:
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
-    if ALL_SUBPROJECTS:
-        command.append('--all-sub-projects')
+
     
     response = subprocess.run(command, stdout=subprocess.PIPE)
     result = json.loads(response.stdout.decode())
