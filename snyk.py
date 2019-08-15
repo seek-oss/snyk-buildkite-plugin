@@ -219,7 +219,10 @@ def snyk_monitor():
         raise Exception('snyk monitor returned an error')
 
     message = 'Taking snapshot of project dependencies!\n'
-    message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
+
+    if ALL_SUBPROJECTS is False:
+        message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
+
     print(message)
 
 def send_metrics(event_name, error_message=None):
