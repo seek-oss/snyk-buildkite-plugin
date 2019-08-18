@@ -22,6 +22,7 @@ try:
     # mandatory fields
     REPOSITORY = os.environ['REPOSITORY']
     LANGUAGE = os.environ['LANGUAGE']
+    ALL_SUBPROJECTS =  True if 'ALLSUBPROJECTS' in os.environ and 'true' in os.environ['ALLSUBPROJECTS'] else False
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
@@ -110,6 +111,11 @@ def configure_scala():
         print('Artifactory username/password not specified!')
         os.chdir(REPOSITORY)
 
+def check_for_snyk_test_error(result):
+    if 'error' in result:
+        TEST_SUCCESS = False
+        raise Exception('snyk test returned an error: {}'.format(result['error']))
+
 def snyk_test():
     EXIT_CODE = 0
     command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
@@ -120,24 +126,36 @@ def snyk_test():
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
+    if ALL_SUBPROJECTS:
+        command.append('--all-sub-projects')
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
+
+    global TEST_SUCCESS
+    TEST_SUCCESS = True
+    vulns = []
+    if ALL_SUBPROJECTS:
+        for single_result in results:
+            check_for_snyk_test_error(single_result)
+            if len(single_result['vulnerabilities']) > 0:
+                for v in single_result['vulnerabilities']:
+                    vulns.append(v)
+    else:
+        check_for_snyk_test_error(results)
+        vulns = results['vulnerabilities']
+
+
     results_seen = {
         'low': {},
         'medium': {},
         'high': {}
     }
-
-    global TEST_SUCCESS
-    TEST_SUCCESS = 'error' not in results
-    if not TEST_SUCCESS:
-        raise Exception('snyk test returned an error: {}'.format(results['error']))
-
-    for result in results['vulnerabilities']:
+    for result in vulns:
         # skip over license results for the time being
         if 'license' in result:
             continue
+
         introduced_from = result['from']
         severity = result['severity']
         if result['id'] in results_seen[severity]:
@@ -150,10 +168,10 @@ def snyk_test():
                 'severity': result['severity'],
                 'isUpgradable': result['isUpgradable'],
                 'isPatchable': result['isPatchable'],
-                'from': [introduced_from], 
+                'from': [introduced_from],
                 'upgradePath': [result['upgradePath']]
             }
-    
+
     # vulnerability metrics
     EVENT_DATA['vulnHigh'] = len(results_seen['high'].keys())
     EVENT_DATA['vulnMedium'] = len(results_seen['medium'].keys())
@@ -183,35 +201,56 @@ def snyk_test():
             if result['isUpgradable']:
                 message += BOLD + 'Remediation: \n\t Upgrade {} to {} (triggers upgrades to {})\n'.format(result['from'][0][1], result['upgradePath'][0][1], ' > '.join(result['upgradePath'][0][1:])) + UNBOLD
             print(message)
-    
-    summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
-    print(summary)
+
+    if not ALL_SUBPROJECTS:
+        summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
+        print(summary)
 
     for severity in results_seen:
         if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
             EXIT_CODE = 1
     return EXIT_CODE
 
+def check_monitor_result(result):
+    success = False if 'error' in result else True
+    if not success:
+        MONITOR_SUCCESS = False
+        raise Exception('snyk monitor returned an error')
+
+    message = 'Taking snapshot of project dependencies!\n'
+    message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
+
+    print(message)
+
 def snyk_monitor():
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
+
+    # monitor doesnt support all-sub-projects and project-name in the same command line.
+    if ALL_SUBPROJECTS:
+        command.append('--all-sub-projects')
+    else:
+        command.append('--project-name={}'.format(REPOSITORY_SLUG))
+
     if PATH:
         command.append('--file={}'.format(PATH))
     if SCAN_DEV_DEPS:
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
+
     
     response = subprocess.run(command, stdout=subprocess.PIPE)
-    result = json.loads(response.stdout.decode())
+    results = json.loads(response.stdout.decode())
     
     global MONITOR_SUCCESS
-    MONITOR_SUCCESS = False if 'error' in result else True
-    if not MONITOR_SUCCESS:
-        raise Exception('snyk monitor returned an error')
+    MONITOR_SUCCESS = True
 
-    message = 'Taking snapshot of project dependencies!\n'
-    message += 'Vulnerabilities for the project can be found here: {}, where vulnerabilites can be ignored for subsequent scans.'.format(result['uri'].rsplit('/history')[0])
-    print(message)
+    if ALL_SUBPROJECTS:
+        for single_result in results:
+            check_monitor_result(single_result)
+    else:
+        check_monitor_result(results)
+
 
 def send_metrics(event_name, error_message=None):
     try:

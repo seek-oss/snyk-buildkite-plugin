@@ -28,6 +28,8 @@ configuration:
       type: string
     packageManager:
       type: string
+    allSubprojects:
+      type: boolean
   required:
     - org
     - language

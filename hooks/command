@@ -16,6 +16,12 @@ then
   export BLOCK=$BUILDKITE_PLUGIN_SNYK_BLOCK
 fi
 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_ALLSUBPROJECTS" ]];
+then
+  echo "All Subprojects: $BUILDKITE_PLUGIN_SNYK_ALLSUBPROJECTS"
+  export ALLSUBPROJECTS=$BUILDKITE_PLUGIN_SNYK_ALLSUBPROJECTS
+fi
+
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_LANGUAGE" ]]; 
 then
   echo "Language: $BUILDKITE_PLUGIN_SNYK_LANGUAGE"
@@ -112,5 +118,6 @@ docker run \
   -e NPM_TOKEN \
   -e ARTIFACTORY_USERNAME \
   -e ARTIFACTORY_PASSWORD \
+  -e ALLSUBPROJECTS \
   -v $DIR/..:/plugin \
   -v `pwd`:/$REPOSITORY docker-snyk:latest

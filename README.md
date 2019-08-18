@@ -73,3 +73,8 @@ Specify the specific package manager used for dependencies being tested.
 This is useful for scanning dependencies in monorepos.
 
 Example: pip
+
+### `allSubprojects` (optional)
+Useful for gradle builds that have multiple subprojects. Sets `--all-sub-projects` as per https://snyk.io/docs/cli-advanced-gradle-testing/
+
+Values: true, false (defaults to false)
