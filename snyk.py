@@ -28,6 +28,9 @@ try:
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
     REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG']
     ORG = os.environ['ORG']
+    ARTIFACTORY_URL = os.environ['ARTIFACTORY_URL'] if 'ARTIFACTORY_URL' in os.environ else ''
+    ARTIFACTORY_USERNAME = os.environ['ARTIFACTORY_USERNAME'] if 'ARTIFACTORY_USERNAME' in os.environ else ''
+    ARTIFACTORY_PASSWORD = os.environ['ARTIFACTORY_PASSWORD'] if 'ARTIFACTORY_PASSWORD' in os.environ else ''
     NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
     SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
     PACKAGE_MANAGER = os.environ['PACKAGE_MANAGER'] if 'PACKAGE_MANAGER' in os.environ else ''
@@ -84,7 +87,7 @@ def configure_node():
 
 def configure_scala():
     print('Configuring scala.\n')
-    if 'ARTIFACTORY_URL' in os.environ and 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
+    if ARTIFACTORY_URL and ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD:
         print('Configuring artifactory endpoint and credentials')
         if os.path.isdir(REPOSITORY):
             print(f'Moving into directory: {REPOSITORY}')
@@ -106,9 +109,9 @@ def configure_scala():
 
             with open(gradle_properties, 'a') as f:
                 f.write('\n')
-                f.write('artifactoryUrl={}\n'.format(os.environ['ARTIFACTORY_URL']))
-                f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-                f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
+                f.write('artifactoryUrl={}\n'.format(ARTIFACTORY_URL))
+                f.write('artifactoryUsername={}\n'.format(ARTIFACTORY_USERNAME))
+                f.write('artifactoryPassword={}\n'.format(ARTIFACTORY_PASSWORD))
 
     else:
         print('Artifactory endpoint/credentials are not specified!')
