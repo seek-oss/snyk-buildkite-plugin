@@ -40,7 +40,7 @@ then
 fi
 
 # path to dependency file
-if [[ -n "$BUILDKITE_PLUGIN_SNYK_PATH" ]]; 
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_PATH" ]];
 then
   echo "Path: $BUILDKITE_PLUGIN_SNYK_PATH"
   export DEPENDENCY_PATH=$BUILDKITE_PLUGIN_SNYK_PATH
@@ -78,6 +78,7 @@ fi
 # artifactory credentials
 if [[ -n "$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYURL" ]];
 then
+  echo "Artifactory Url: $BUILDKITE_PLUGIN_SNYK_ARTIFACTORYURL"
   export ARTIFACTORY_URL=$BUILDKITE_PLUGIN_SNYK_ARTIFACTORYURL
 fi
 
