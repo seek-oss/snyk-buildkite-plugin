@@ -26,9 +26,12 @@ try:
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
     METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
-    REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG'] 
+    REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG']
     ORG = os.environ['ORG']
-    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''    
+    ARTIFACTORY_URL = os.environ['ARTIFACTORY_URL'] if 'ARTIFACTORY_URL' in os.environ else ''
+    ARTIFACTORY_USERNAME = os.environ['ARTIFACTORY_USERNAME'] if 'ARTIFACTORY_USERNAME' in os.environ else ''
+    ARTIFACTORY_PASSWORD = os.environ['ARTIFACTORY_PASSWORD'] if 'ARTIFACTORY_PASSWORD' in os.environ else ''
+    NPM_TOKEN = os.environ['NPM_TOKEN'] if 'NPM_TOKEN' in os.environ else ''
     SUB_DIRECTORY = os.environ['SUB_DIRECTORY'] if 'SUB_DIRECTORY' in os.environ else ''
     PACKAGE_MANAGER = os.environ['PACKAGE_MANAGER'] if 'PACKAGE_MANAGER' in os.environ else ''
     BLOCK = False if 'BLOCK' in os.environ and 'false' in os.environ['BLOCK'] else True
@@ -72,8 +75,8 @@ def configure_node():
     if SUB_DIRECTORY:
         print(f'Moving into sub directory: {SUB_DIRECTORY}')
         os.chdir(SUB_DIRECTORY)
-    
-    if NPM_TOKEN: 
+
+    if NPM_TOKEN:
         with open('.npmrc', 'a') as f:
             f.write('//registry.npmjs.org/:_authToken={}'.format(NPM_TOKEN))
     if 'package-lock.json' in PATH or 'yarn.lock' in PATH:
@@ -83,9 +86,9 @@ def configure_node():
         subprocess.run(['npm', 'install', '-s'])
 
 def configure_scala():
-    print('Configuring scala!\n')
-    if 'ARTIFACTORY_USERNAME' in os.environ and 'ARTIFACTORY_PASSWORD' in os.environ:
-        print('Configuring artifactory username and password')
+    print('Configuring scala.\n')
+    if ARTIFACTORY_URL and ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD:
+        print('Configuring artifactory endpoint and credentials')
         if os.path.isdir(REPOSITORY):
             print(f'Moving into directory: {REPOSITORY}')
             os.chdir(REPOSITORY)
@@ -96,19 +99,22 @@ def configure_scala():
             print('Cannot determine directory for Snyk testing - exiting')
             exit(0)
 
-        gradle_properties='gradle.properties'
-        if os.path.isfile(gradle_properties):
-            print('gradle.properties exists in current directory!')
-        else:
-            print('gradle.properties will be created!')
+        if os.path.isfile('build.gradle'):
+            gradle_properties='gradle.properties'
 
-        with open(gradle_properties, 'a') as f:
-            f.write('\n')
-            f.write('artifactoryUsername={}\n'.format(os.environ['ARTIFACTORY_USERNAME']))
-            f.write('artifactoryPassword={}\n'.format(os.environ['ARTIFACTORY_PASSWORD']))
-            
+            if os.path.isfile(gradle_properties):
+                print('gradle.properties exists in current directory.')
+            else:
+                print('gradle.properties will be created.')
+
+            with open(gradle_properties, 'a') as f:
+                f.write('\n')
+                f.write('artifactoryUrl={}\n'.format(ARTIFACTORY_URL))
+                f.write('artifactoryUsername={}\n'.format(ARTIFACTORY_USERNAME))
+                f.write('artifactoryPassword={}\n'.format(ARTIFACTORY_PASSWORD))
+
     else:
-        print('Artifactory username/password not specified!')
+        print('Artifactory endpoint/credentials are not specified!')
         os.chdir(REPOSITORY)
 
 def check_for_snyk_test_error(result):
@@ -238,10 +244,10 @@ def snyk_monitor():
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
 
-    
+
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
-    
+
     global MONITOR_SUCCESS
     MONITOR_SUCCESS = True
 
