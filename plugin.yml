@@ -16,12 +16,6 @@ configuration:
       type: string
     severity:
       type: string
-    artifactoryUrl:
-      type: string
-    artifactoryUsername:
-      type: string
-    artifactoryPassword:
-      type: string
     org:
       type: string
     scanDevDeps:

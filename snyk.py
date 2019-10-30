@@ -98,6 +98,7 @@ def configure_scala():
 
         if os.path.isfile('build.gradle'):
             gradle_properties='gradle.properties'
+
             if os.path.isfile(gradle_properties):
                 print('gradle.properties exists in current directory.')
             else:
