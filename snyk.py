@@ -5,6 +5,10 @@ import subprocess
 import logging
 import shutil
 import boto3
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 BOLD = '\033[1m'
 UNBOLD = '\033[0;0m'
@@ -50,7 +54,8 @@ try:
     }
 
 except Exception as e:
-    print('failed to extract environment variables: {}'.format(e))
+    logger.error('failed to extract environment variables')
+    logger.exception(e)
     exit(0)
 
 SEVERITY_MAPPING = {
@@ -257,7 +262,6 @@ def snyk_monitor():
     else:
         check_monitor_result(results)
 
-
 def send_metrics(event_name, error_message=None):
     try:
         sns_client = boto3.client('sns', region_name='ap-southeast-2')
@@ -277,7 +281,8 @@ def send_metrics(event_name, error_message=None):
             Message=json.dumps(event)
         )
     except Exception as e:
-        print('error sending metrics: {}'.format(e))
+        logger.error('error sending metrics')
+        logger.exception(e)
         exit(0)
 
 if __name__ == "__main__":
@@ -285,9 +290,9 @@ if __name__ == "__main__":
     try:
         eval('configure_{}()'.format(LANGUAGE))
         subprocess.run(['snyk', 'auth', os.environ['SNYK_TOKEN']])
-
     except Exception as e:
-        print('config error: {}'.format(e))
+        logger.error('config error')
+        logger.exception(e)
         send_metrics(event_name=EVENTS['error'], error_message=e)
         exit(0)
 
@@ -296,7 +301,8 @@ if __name__ == "__main__":
             EXIT_CODE = snyk_test()
             snyk_monitor()
         except Exception as e:
-            print('error running test and monitor: {}'.format(e))
+            logger.error('error running test and monitor')
+            logger.exception(e)
             EXIT_CODE = None
             continue
         break
