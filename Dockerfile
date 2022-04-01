@@ -1,6 +1,6 @@
-FROM python:3.7.4-alpine3.10
+FROM python:3.7.13-alpine3.15
 
-ENV SBT_VERSION 1.3.0
+ENV SBT_VERSION 1.6.2
 ENV PATH=$PATH:/root/.local/bin:/usr/local/sbt/bin
 
 RUN apk update && apk add --update npm jq go libc-dev openjdk8
