@@ -29,7 +29,6 @@ try:
     ALL_SUBPROJECTS =  True if 'ALLSUBPROJECTS' in os.environ and 'true' in os.environ['ALLSUBPROJECTS'] else False
     VERSION = os.environ['VERSION']
     PLUGIN_NAME = os.environ['PLUGIN_NAME']
-    METRICS_TOPIC_ARN = os.environ['METRICS_TOPIC_ARN']
     REPOSITORY_SLUG = os.environ['REPOSITORY_SLUG']
     ORG = os.environ['ORG']
     ARTIFACTORY_URL = os.environ['ARTIFACTORY_URL'] if 'ARTIFACTORY_URL' in os.environ else ''
@@ -262,29 +261,6 @@ def snyk_monitor():
     else:
         check_monitor_result(results)
 
-def send_metrics(event_name, error_message=None):
-    try:
-        sns_client = boto3.client('sns', region_name='ap-southeast-2')
-        # add additional fields to event data
-        EVENT_DATA['testSuccess'] = TEST_SUCCESS
-        EVENT_DATA['monitorSuccess'] = MONITOR_SUCCESS
-        if error_message:
-            EVENT_DATA['error_message'] = error_message
-
-        event = {
-            'type': event_name,
-            'source': PLUGIN_NAME,
-            'data': EVENT_DATA
-        }
-        sns_client.publish(
-            TopicArn=METRICS_TOPIC_ARN,
-            Message=json.dumps(event)
-        )
-    except Exception as e:
-        logger.error('error sending metrics')
-        logger.exception(e)
-        exit(0)
-
 if __name__ == "__main__":
     EXIT_CODE = None
     try:
@@ -293,7 +269,6 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error('config error')
         logger.exception(e)
-        send_metrics(event_name=EVENTS['error'], error_message=e)
         exit(0)
 
     for attempt in range(0,3):
@@ -307,14 +282,3 @@ if __name__ == "__main__":
             continue
         break
 
-    if EXIT_CODE == None:
-        send_metrics(event_name=EVENTS['error'], error_message='snyk test and monitor did not both succeed')
-        exit(0)
-    elif EXIT_CODE == 0:
-        send_metrics(event_name=EVENTS['pass'])
-        exit(0)
-    elif EXIT_CODE == 1:
-        send_metrics(event_name=EVENTS['fail'])
-        if BLOCK:
-            exit(1)
-        exit(0)
