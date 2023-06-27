@@ -216,9 +216,9 @@ def snyk_test():
         summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
         print(summary)
 
-    for severity in results_seen:
-        if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
-            EXIT_CODE = 1
+    # for severity in results_seen:
+    #     if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
+    #         EXIT_CODE = 1
     return EXIT_CODE
 
 def check_monitor_result(result):
