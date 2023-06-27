@@ -159,7 +159,8 @@ def snyk_test():
     results_seen = {
         'low': {},
         'medium': {},
-        'high': {}
+        'high': {},
+        'critical': {}
     }
     for result in vulns:
         # skip over license results for the time being
