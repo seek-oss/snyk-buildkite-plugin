@@ -234,7 +234,7 @@ def check_monitor_result(result):
     print(message)
 
 def snyk_monitor():
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--strict-out-of-sync=false']
 
     # monitor doesnt support all-sub-projects and project-name in the same command line.
     if ALL_SUBPROJECTS:
