@@ -116,5 +116,6 @@ docker run \
   -e ARTIFACTORY_USERNAME \
   -e ARTIFACTORY_PASSWORD \
   -e ALLSUBPROJECTS \
+  -e STRICT_OUT_OF_SYNC \
   -v $DIR/..:/plugin \
   -v `pwd`:/$REPOSITORY docker-snyk:latest
