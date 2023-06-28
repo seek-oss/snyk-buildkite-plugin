@@ -41,7 +41,7 @@ try:
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
     SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
-    STRICT_OUT_OF_SYNC = False if 'STRICT_OUT_OF_SYNC' in os.environ and 'false' in os.environ['STRICT_OUT_OF_SYNC'] else True
+    STRICT_OUT_OF_SYNC = 'false' if 'STRICT_OUT_OF_SYNC' in os.environ and 'false' in os.environ['STRICT_OUT_OF_SYNC'] else True
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
