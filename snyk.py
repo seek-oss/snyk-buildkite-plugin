@@ -140,6 +140,7 @@ def snyk_test():
     if ALL_SUBPROJECTS:
         command.append('--all-sub-projects')
     if STRICT_OUT_OF_SYNC:
+        print(f"Strict out of sync config called: {STRICT_OUT_OF_SYNC}")
         command.append(f'--strict-out-of-sync={STRICT_OUT_OF_SYNC}')
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
@@ -252,6 +253,7 @@ def snyk_monitor():
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
     if STRICT_OUT_OF_SYNC:
+        print(f"Strict out of sync config called: {STRICT_OUT_OF_SYNC}")
         command.append(f'--strict-out-of-sync={STRICT_OUT_OF_SYNC}')
 
 
