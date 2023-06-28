@@ -129,7 +129,7 @@ def check_for_snyk_test_error(result):
 
 def snyk_test():
     EXIT_CODE = 0
-    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG), '--strict-out-of-sync=false']
+    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
     if PATH:
         print('Explicit path specified')
         command.append('--file={}'.format(PATH))
@@ -139,6 +139,8 @@ def snyk_test():
         command.append(f'--packageManager={PACKAGE_MANAGER}')
     if ALL_SUBPROJECTS:
         command.append('--all-sub-projects')
+    if STRICT_OUT_OF_SYNC:
+        command.append(f'--strict-out-of-sync={STRICT_OUT_OF_SYNC}')
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
@@ -250,7 +252,7 @@ def snyk_monitor():
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
     if STRICT_OUT_OF_SYNC:
-        command.append(f'--packageManager={STRICT_OUT_OF_SYNC}')
+        command.append(f'--strict-out-of-sync={STRICT_OUT_OF_SYNC}')
 
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
