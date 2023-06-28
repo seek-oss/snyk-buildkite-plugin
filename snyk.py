@@ -41,6 +41,7 @@ try:
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
     SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
+    STRICT_OUT_OF_SYNC = False if 'STRICT_OUT_OF_SYNC' in os.environ and 'false' in os.environ['STRICT_OUT_OF_SYNC'] else True
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
@@ -234,7 +235,7 @@ def check_monitor_result(result):
     print(message)
 
 def snyk_monitor():
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--strict-out-of-sync=false']
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
 
     # monitor doesnt support all-sub-projects and project-name in the same command line.
     if ALL_SUBPROJECTS:
@@ -248,6 +249,8 @@ def snyk_monitor():
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
+    if STRICT_OUT_OF_SYNC:
+        command.append(f'--packageManager={STRICT_OUT_OF_SYNC}')
 
 
     response = subprocess.run(command, stdout=subprocess.PIPE)

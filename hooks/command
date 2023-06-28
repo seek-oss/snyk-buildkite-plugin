@@ -86,6 +86,13 @@ then
   export PACKAGE_MANAGER=$BUILDKITE_PLUGIN_SNYK_PACKAGEMANAGER
 fi
 
+# package manager experimental flag
+if [[ -n "$BUILDKITE_PLUGIN_SNYK_STRICTOUTOFSYNC" ]];
+then
+  echo "Strict out of sync: $BUILDKITE_PLUGIN_SNYK_STRICTOUTOFSYNC"
+  export STRICT_OUT_OF_SYNC=$BUILDKITE_PLUGIN_SNYK_STRICTOUTOFSYNC
+fi
+
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 docker build -q ${DIR}/.. -t docker-snyk:latest
