@@ -26,6 +26,8 @@ configuration:
       type: string
     allSubprojects:
       type: boolean
+    strictOutOfSync:
+      type: boolean
   required:
     - org
     - language

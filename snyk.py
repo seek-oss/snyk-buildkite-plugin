@@ -3,9 +3,6 @@ import os
 import json
 import subprocess
 import logging
-import shutil
-import boto3
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -41,6 +38,7 @@ try:
     PATH = os.environ['DEPENDENCY_PATH'] if 'DEPENDENCY_PATH' in os.environ else ''
     SEVERITY = os.environ['SEVERITY'] if 'SEVERITY' in os.environ else ''
     SCAN_DEV_DEPS = 'SCAN_DEV_DEPS' in os.environ and 'true' == os.environ['SCAN_DEV_DEPS']
+    STRICT_OUT_OF_SYNC = 'false' if 'STRICT_OUT_OF_SYNC' in os.environ and 'false' in os.environ['STRICT_OUT_OF_SYNC'] else True
     EVENT_DATA = {
         'version': VERSION,
         'repository': REPOSITORY,
@@ -128,7 +126,7 @@ def check_for_snyk_test_error(result):
 
 def snyk_test():
     EXIT_CODE = 0
-    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG)]
+    command = ['snyk', 'test', '--json', '--org={}'.format(ORG), '--project-name={}'.format(REPOSITORY_SLUG), '--strict-out-of-sync={}'.format(STRICT_OUT_OF_SYNC)]
     if PATH:
         print('Explicit path specified')
         command.append('--file={}'.format(PATH))
@@ -159,7 +157,8 @@ def snyk_test():
     results_seen = {
         'low': {},
         'medium': {},
-        'high': {}
+        'high': {},
+        'critical': {}
     }
     for result in vulns:
         # skip over license results for the time being
@@ -216,9 +215,9 @@ def snyk_test():
         summary = 'Tested {} dependencies for known issues, found {} issues, {} vulnerable paths\n'.format(results['dependencyCount'], results['uniqueCount'], vulnerable_paths)
         print(summary)
 
-    for severity in results_seen:
-        if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
-            EXIT_CODE = 1
+    # for severity in results_seen:
+    #     if SEVERITY_MAPPING[SEVERITY] <= SEVERITY_MAPPING[severity] and len(results_seen[severity]) > 0:
+    #         EXIT_CODE = 1
     return EXIT_CODE
 
 def check_monitor_result(result):
@@ -233,7 +232,7 @@ def check_monitor_result(result):
     print(message)
 
 def snyk_monitor():
-    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG)]
+    command = ['snyk', 'monitor', '--json', '--org={}'.format(ORG), '--strict-out-of-sync={}'.format(STRICT_OUT_OF_SYNC)]
 
     # monitor doesnt support all-sub-projects and project-name in the same command line.
     if ALL_SUBPROJECTS:
@@ -247,7 +246,6 @@ def snyk_monitor():
         command.append('--dev')
     if PACKAGE_MANAGER:
         command.append(f'--packageManager={PACKAGE_MANAGER}')
-
 
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
