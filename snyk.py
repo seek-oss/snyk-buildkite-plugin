@@ -3,9 +3,6 @@ import os
 import json
 import subprocess
 import logging
-import shutil
-import boto3
-import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -140,7 +137,6 @@ def snyk_test():
     if ALL_SUBPROJECTS:
         command.append('--all-sub-projects')
 
-    print(command)
     response = subprocess.run(command, stdout=subprocess.PIPE)
     results = json.loads(response.stdout.decode())
 
