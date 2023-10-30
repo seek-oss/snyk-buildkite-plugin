@@ -95,7 +95,7 @@ fi
 
 echo "Running command step!"
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
-docker build -secret id=npmrc,src="${HOME}/.npmrc" -q ${DIR}/.. -t docker-snyk:latest
+docker build --secret id=npmrc,src="${HOME}/.npmrc" -q ${DIR}/.. -t docker-snyk:latest
 docker run \
   -e SUB_DIRECTORY \
   -e PACKAGE_MANAGER \
